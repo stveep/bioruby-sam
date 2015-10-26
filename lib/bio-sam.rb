@@ -8,5 +8,8 @@
 #
 # In this file only require other files. Avoid other source code.
 
-require 'bio-sam/sam.rb'
+require 'bio'
+require 'bio-sam/iterate_pairs.rb'
+require 'bio-sam/cigar.rb'
+require 'bio-sam/mdtag.rb'
 
