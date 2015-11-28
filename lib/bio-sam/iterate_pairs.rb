@@ -44,8 +44,6 @@ module Bio::Alignment::IteratePairs
 					if pair[1].is_a? String
 						puts pair.inspect
 						puts total
-
-
 						new_pair[1] = new_pair[1][total-offset-pairlength,length]
 					else
 						new_pair[1] = length

@@ -15,6 +15,7 @@ require 'jeweler'
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://guides.rubygems.org/specification-reference/ for more options
   gem.name = "bioruby-sam"
+  gem.version = '0.1.0'
   gem.homepage = "http://github.com/stveep/bioruby-sam"
   gem.license = "MIT"
   gem.summary = %Q{one-line summary of your gem}

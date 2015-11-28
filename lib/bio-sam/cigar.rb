@@ -1,6 +1,4 @@
 # Parse a CIGAR string
-require 'rubygems'
-require 'bio'
 # An example from Exonerate output. Ideally will also allow SAM file input to be used.
 #   1 : CGGCTATGGGGTCGTGGGTCCCGCGTTG-CTCTGGGGCTCGGCACCCTGGGGCGGCACGGCCGT :  63
 #       | | || | ||||||||||||||||||| |||||||||||||||||||||||||||||||||||
@@ -10,12 +8,14 @@ require 'bio'
 # cigar: SP-A12_D02_2015-01-16.seq 0 611 + SP-A3_ref 0 621 + 2514  M 3 I 1 M 2 I 1 M 21 D 1 M 306 D 9 M 89 I 1 M 126 D 1 M 24 D 1 M 8 I 1 M 6 D 1 M 5 D 1 M 17
 # I are not counted in reference
 # Regexp (from SAM specification) - but in exonerate the number comes first: ([0-9]+[MIDNSHP])+|\*
+
 class Bio::Alignment::CIGAR
 	include Bio::Alignment::IteratePairs
 	@@regexps = {"exonerate" => /([MIDNSHP]{1})(\d+)/, "sam" => /(\d+)([MIDNSHP]{1})/}
 	# Type of elements that count towards the reference length:
 	# TODO: add full support for other elements S, H etc.
 	@@reference = /[MD]/
+	@@subexp = /([atgcAGCT]+)>([atgcAGTC]+)/
 	attr_accessor :pairs, :reference
 
 	def initialize(string,ref,source="")
@@ -59,6 +59,7 @@ class Bio::Alignment::CIGAR
 		new_cigar = Bio::Alignment::CIGAR.new(new_string,@reference[offset-1,length])
 		new_cigar.remove_empty!
 	end
+	alias_method :slice, :subalignment
 
 	# Given a CIGAR-based [not reference - use subalignment] offset and length, return a subregion
 	def subcigar(offset,length)
@@ -112,6 +113,7 @@ class Bio::Alignment::CIGAR
 
 	# Output a representation of the query: replace deleted portions with "-", flag insertions with "*" or sim. Optionally provide the sequence (or symbols to use) of insertions, in order of appearence.
 	# Should be able to accept an array
+	# TODO: Add support for substitution highlighting (e.g lowercasing)
 	def query(insertions=nil)
 		if (insertions && (insertions.is_a? String))
 			insertions = [insertions]
@@ -138,6 +140,60 @@ class Bio::Alignment::CIGAR
 		end
 		sequence.join("")
 	end
+
+	def mutations(reference_pos=0,insertions=[],subexp=@@subexp,*subs)
+		if insertions
+			if insertions.is_a? String
+				insertions = [insertions]
+			end
+		end
+		first_match = true
+		total = 0
+		mutations = []
+		@pairs.each do |pair|
+			case pair[0]
+				when "M"
+					#break if first_match == false
+					reference_pos += pair[1]
+					total += pair[1]
+					first_match = false
+				when "D"
+					mut = Bio::Mutation.new
+					mut.type = :deletion
+					mut.reference = @reference[total,pair[1]].upcase
+					mut.position = (reference_pos + 1).to_s
+					mut.mutant = nil
+					mutations << mut
+					total += pair[1]
+				when "I"
+					mut = Bio::Mutation.new
+					mut.type = :insertion
+					mut.reference = nil
+					mut.position = reference_pos.to_s
+					mut.mutant = (insertions.length == 0) ? "N" : insertions.shift.upcase
+          mutations << mut
+			end
+		end
+		# Use for substitutions, but could also pass any other annotation to include in here, as an array of strings
+		# Bit of a hack, assumes 123X>Y notation given from elsewhere - but this needs MD tag so can't be called only from CIGAR.
+		# TODO abstract this part to the SAM class and call from there - better logic
+		subs = subs.first # >1 arguments discarded
+		if subs
+			if (subs.length > 0 && (subs.is_a? Array))
+				subs.each do |substitution|
+					mut = Bio::Mutation.new
+					mut.type = :substition
+					mut.position = substitution.match(/\d+/)[0]
+					bases = substitution.match(subexp)
+					mut.reference = bases[1]
+					mut.mutant = bases[2]
+					mutations << mut
+				end
+			end
+		end
+		mutations.sort{|x| x.position}
+	end
+
 
 	# Output hgnc variant format given reference position. Only deletions can be accurately annotated from the cigar string; insertions or wild type seqeunces return nil
 	def hgnc(reference_pos=0,insertions=[],type="g",*subs)
@@ -202,13 +258,14 @@ class Bio::Alignment::CIGAR
 		hash = Hash.new{|h,k| h[k] = []}
 		@pairs.each do |pair|
 			if pair[0].match(type)
-				hash[$&] << [total, pair[1],qtotal]
+				hash[$&] << [total, pair[1], qtotal]
 			end
 			total += pair[1] if pair[0].match(@@reference)
 			qtotal += pair[1]
 		end
 		hash
 	end
+
 
 	private
 
