@@ -9,8 +9,8 @@
 # In this file only require other files. Avoid other source code.
 
 require 'bio'
+require 'bio-sam/sam'
 require 'bio-sam/iterate_pairs'
 require 'bio-sam/cigar'
 require 'bio-sam/mdtag'
 require 'bio-sam/mutation'
-require 'bio-sam/sam'
