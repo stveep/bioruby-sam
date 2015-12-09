@@ -1,3 +1,4 @@
+# Inherit from hash for easy json serialisation
 class Bio::Mutation < Hash
   attr_accessor :position, :type, :reference, :mutant, :seqname
   def initialize params={position: 1,type: :uninitialized, reference: nil, mutant: nil, seqname:nil}

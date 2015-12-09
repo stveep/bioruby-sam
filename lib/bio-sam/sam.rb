@@ -81,7 +81,7 @@ class Bio::Alignment::SAM
 					mut = Bio::Mutation.new
 					mut.type = :insertion
 					mut.reference = nil
-					mut.position = reference_pos.to_s
+					mut.position = reference_pos
 					mut.mutant = (insertions.length == 0) ? "N" : insertions.shift.upcase
           mutations << mut
 			end
@@ -104,7 +104,7 @@ class Bio::Alignment::SAM
           when "s"
             mut = Bio::Mutation.new
             mut.type = :substitution
-            mut.position = (substart+p[2] + 1).to_s
+            mut.position = substart+p[2] + 1
             mut.reference = p[1].upcase
             mut.mutant = @seq[read_position,p[1].length].upcase
             mutations << mut
@@ -112,13 +112,13 @@ class Bio::Alignment::SAM
             mut = Bio::Mutation.new
   					mut.type = :deletion
   					mut.reference = p[1].upcase
-  					mut.position = (substart+p[2] + 1).to_s
+  					mut.position = substart+p[2] + 1
   					mut.mutant = nil
   					mutations << mut
         end
       end
     end
-    mutations.sort{|x| x.position}
+    mutations.sort{|x,y| x.position.to_i <=> y.position.to_i}
   end
 
 end
