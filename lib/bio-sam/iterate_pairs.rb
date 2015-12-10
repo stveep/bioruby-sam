@@ -1,6 +1,7 @@
 module Bio::Alignment::IteratePairs
 	private
-	#Mixin to iterate through ordered paired [operation, value] data and take subsets - e.g. broken down CIGAR and MD:Z tags. Can set a regexp for the operation; default matches everything
+	#Mixin to iterate through ordered paired [operation, value] data and take subsets - e.g. broken down CIGAR and MD:Z tags.
+	#Can set a regexp for the operation; default matches everything
 	def iterate_pairs(pairs,offset,length,regexp = //)
 		offset = offset.to_i
 		length - length.to_i

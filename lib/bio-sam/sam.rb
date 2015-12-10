@@ -68,12 +68,7 @@ class Bio::Alignment::SAM
 					first_match = false
         # Call deletions using the MD:Z tag - avoid need to supply reference seq.
 				when "D"
-				# 	mut = Bio::Mutation.new
-				# 	mut.type = :deletion
-				# 	mut.reference = @reference[total,pair[1]].upcase
-				# 	mut.position = (reference_pos + 1).to_s
-				# 	mut.mutant = nil
-				# 	mutations << mut
+				# Deletions are called below but still need to count here
 				  total += pair[1]
 				when "I"
 					mut = Bio::Mutation.new
@@ -116,7 +111,7 @@ class Bio::Alignment::SAM
         end
       end
     end
-    mutations.sort{|x,y| x.position.to_i <=> y.position.to_i}
+    mutations.length > 0 ? mutations.sort{|x,y| x.position.to_i <=> y.position.to_i} : nil
   end
 
 end

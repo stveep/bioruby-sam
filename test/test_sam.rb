@@ -50,7 +50,7 @@ class SAMTest < Test::Unit::TestCase
 	def test_sorting
 		insertion_and_deletion = Bio::Alignment::SAM.new("I2M5K:00253:00406       0       5       1       70      63M2I138M1D27M7S        *       0       0       CAGTGATCTTCCAGATAGCCCTGGACAAACCATGCCACCAAGCAGAAGTAAAACACCTCCACCATACCTCCTCAAACAGCTCAAACCAAGCGAGAAGTACCTAAAAATAAAGCACCTACTGCTGAAAAGAGAGAGAGTGGACCTAAGCAAGCTGCAGTAAATGCTGCAGTTCAGAGGGTCCAGGTTCTTCCAGATGCTGATACTTATTACATTTTGCCACGGAAAGTACTGCTGAGG   @CDDDCCCCACACCCCCCCC?CCACCCC>A6;;;;7;;6;6;BC;;6;;;;;.;;>ADDA??;;;;;?CCACCCD>C??@CCCC>C@C;>?CCCC@C=::@:::::+:::/:CCC?>>>>CCCCDDD9CCCC@AB????=AB>??;?BB>@@@AA???CC<@@?????BB>??;;;B<BC;??8;6:A=@=@BBB;;;?<77//*08*088888*8=9=?B7;;4;??????????<   PG:Z:novoalign  AS:i:183        UQ:i:183        NM:i:3  MD:Z:201^T27")
 	  assert_equal :insertion, insertion_and_deletion.mutations[0].type
-		assert_equal :deletion, insertion_and_deletion.mutations[1].type  
+		assert_equal :deletion, insertion_and_deletion.mutations[1].type
 	end
 
 	def test_deletion_mutation
@@ -67,4 +67,8 @@ class SAMTest < Test::Unit::TestCase
 		assert_equal substitution.mutations[0].mutant, "C"
 		assert_equal substitution.mutations[0].position, 61
   end
+	def test_nil_if_no_mutation
+		no_mut = Bio::Alignment::SAM.new("DKNQZ:00025:00303       0       5       1       37      75M     *       0       0       GCAGTAATTTCCCTGGAGTAAAACTGCGGTCAAAAATGTCCCTCCGTTCTTATGGAAGCCGGAAGGAAGTCTGTA     CCCCCC@CE>CC<CC@CB;;;;.;;;;;AC;::::+:92A:=CCAEE=?>;=:@<B?:<6<*/*/*/*/911112     XT:A:U  NM:i:3  X0:i:1  X1:i:0  XM:i:3  XO:i:1  XG:i:1  MD:Z:75")
+    assert_nil no_mut.mutations
+	end
 end
