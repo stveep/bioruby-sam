@@ -42,8 +42,6 @@ module Bio::Alignment::IteratePairs
 				# Special case where the whole subalignment is contained within one cigar element:
 				if first
 					if pair[1].is_a? String
-						puts pair.inspect
-						puts total
 						new_pair[1] = new_pair[1][total-offset-pairlength,length]
 					else
 						new_pair[1] = length

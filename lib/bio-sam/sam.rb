@@ -43,8 +43,6 @@ class Bio::Alignment::SAM
     subcigar = @cigar.subalignment(offset,length)
     mdz = Bio::Alignment::SAM::MDZ.new(@tags["MD:Z"])
 		mdz = mdz.slice(offset,length)
-    puts subcigar.inspect
-    puts mdz.inspect
     # Get inserted bases from the read sequence, only within the region of interest
     insertions = []
     insertion_positions = subcigar.positions(/I/)
