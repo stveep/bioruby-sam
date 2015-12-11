@@ -59,6 +59,7 @@ class SAMTest < Test::Unit::TestCase
 		assert_equal deletion.mutations[0].reference, "CCTCCACCACCT"
 		assert_equal deletion.mutations[0].mutant, nil
 		assert_equal deletion.mutations[0].position, 56
+		assert_equal "5", deletion.mutations[0].seqname
   end
 	def test_substitution_mutation
 		substitution = Bio::Alignment::SAM.new("OR1FQ:00462:02257       0       ENST00000366794 1     70      193M43S *       0       0       ACTCATCTTCAACAAGCAGCAAGTGCCTTCTGGGGAGTCGGCGATCTTGGACCGAGTAGCCGATGGCATGGTGTTCGGTGCCCTCCTTCCCTGCGAGGAATGCTCGGGTCAGCTGGTCTTCAAGAGCGATGCCTATTACTGCACTGGGGACGTCACTGCCTGGACCAAGTGTATGGTCAAGACACAGACACCCTCCACAGCCTCGGCTCCTGCTGCTGTGAACTCCTCTGCTGAGG    @BCACC@@@@DAFFADCCCCDEID@@?@ACCCDD:@??;<8<1..=>=<1111@@CD??@@CC@C@CFDCACCCADDABCCD?DD@CACD?CC??>C6;6;>>???E?C@??CCDACCC@CD@CCC><?A>>7;<<7<<<??;BBBBB/;;;;;BBBCC@CCACC=@7;;;;;;;6;@@7?@CCCCCC111<6<<+00>>>=CCD;??C@CCCC?????CCAC????CCECDDCDB    PG:Z:novoalign  AS:i:328        UQ:i:328        NM:i:1  MD:Z:60T132")
@@ -66,6 +67,7 @@ class SAMTest < Test::Unit::TestCase
 		assert_equal substitution.mutations[0].reference, "T"
 		assert_equal substitution.mutations[0].mutant, "C"
 		assert_equal substitution.mutations[0].position, 61
+		assert_equal "ENST00000366794", substitution.mutations[0].seqname
   end
 	def test_nil_if_no_mutation
 		no_mut = Bio::Alignment::SAM.new("DKNQZ:00025:00303       0       5       1       37      75M     *       0       0       GCAGTAATTTCCCTGGAGTAAAACTGCGGTCAAAAATGTCCCTCCGTTCTTATGGAAGCCGGAAGGAAGTCTGTA     CCCCCC@CE>CC<CC@CB;;;;.;;;;;AC;::::+:92A:=CCAEE=?>;=:@<B?:<6<*/*/*/*/911112     XT:A:U  NM:i:3  X0:i:1  X1:i:0  XM:i:3  XO:i:1  XG:i:1  MD:Z:75")

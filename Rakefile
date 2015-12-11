@@ -15,13 +15,13 @@ require 'jeweler'
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://guides.rubygems.org/specification-reference/ for more options
   gem.name = "bioruby-sam"
-  gem.version = '0.1.0'
+  gem.version = '0.2.0'
   gem.homepage = "http://github.com/stveep/bioruby-sam"
   gem.license = "MIT"
-  gem.summary = %Q{one-line summary of your gem}
-  gem.description = %Q{longer description of your gem}
+  gem.summary = %Q{Parsing and mutation calling from SAM, CIGAR and MD:Z.}
+  gem.description = %Q{Simple classes for parsing SAM, CIGAR and MD:Z strings, including slices. Methods for calling mutations in HGVS format and looking up consequences using Ensembl VEP REST API. Developed for calling mutations at an expected position in an alignment - e.g. Amplicon sequencing of CRISPR-induced mutations.}
   gem.email = "spettitt@gmail.com"
-  gem.authors = ["stveep"]
+  gem.authors = ["Stephen Pettitt"]
   # dependencies defined in Gemfile
 end
 Jeweler::RubygemsDotOrgTasks.new

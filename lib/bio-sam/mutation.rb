@@ -1,5 +1,5 @@
 # Inherit from hash for easy json serialisation
-class Bio::Mutation < Hash
+class Bio::Mutation
   attr_accessor :position, :type, :reference, :mutant, :seqname
   def initialize params={position: 1,type: :uninitialized, reference: nil, mutant: nil, seqname:nil}
     @position = params[:position]
@@ -9,7 +9,6 @@ class Bio::Mutation < Hash
     @seqname = params[:seqname]
   end
 
-  # TODO Annotate in HGVS format, return String
   # http://www.hgvs.org/mutnomen/recs.html
   # This gives just the annotation. To convert to a full allele description, needs to be combined
   # with e.g. g. for genomic:  g. - can supply this "g", "c" as type to annotate a single mutation directly
@@ -49,9 +48,17 @@ class Bio::Mutation < Hash
     end
   end
 
-  # TODO Look up in Ensembl VEP, return JSON - see Ensembl REST API docs for details
+  # TODO Require reference type - fails without. Assume g, unless matches ENS*T = c?
   def vep(species="human",reference_type=nil)
     EnsemblRest.connect_db
     JSON.parse(EnsemblRest::Variation.vep_hgvs(species,self.to_hgvs(reference_type)))
+  end
+
+  def to_json
+    Oj.dump self
+  end
+
+  def to_yaml
+    YAML.dump self
   end
 end

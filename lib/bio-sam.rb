@@ -10,6 +10,8 @@
 
 require 'bio'
 require 'bio-ensembl-rest'
+require 'oj'
+require 'yaml'
 require 'bio-sam/sam'
 require 'bio-sam/iterate_pairs'
 require 'bio-sam/cigar'

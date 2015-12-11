@@ -38,7 +38,7 @@ class Bio::Alignment::SAM
 
   # Call mutations
   # Want to be able to give a length and offset - use this to generate appropriate sub CIGARs, subMDs & call
-	def mutations reference_pos=0, offset=1, length=@seq.length, translation_start=1
+	def mutations offset=1, length=@seq.length, reference_pos=@pos-1, translation_start=1
     # Generate subalignments from the CIGAR and MD:Z
     subcigar = @cigar.subalignment(offset,length)
     mdz = Bio::Alignment::SAM::MDZ.new(@tags["MD:Z"])
@@ -76,6 +76,7 @@ class Bio::Alignment::SAM
 					mut.reference = nil
 					mut.position = reference_pos
 					mut.mutant = (insertions.length == 0) ? "N" : insertions.shift.upcase
+					mut.seqname = @rname.to_s
           mutations << mut
 			end
 		end
@@ -100,6 +101,7 @@ class Bio::Alignment::SAM
             mut.position = substart+p[2] + 1
             mut.reference = p[1].upcase
             mut.mutant = @seq[read_position,p[1].length].upcase
+						mut.seqname = @rname.to_s
             mutations << mut
           when "d"
             mut = Bio::Mutation.new
@@ -107,6 +109,7 @@ class Bio::Alignment::SAM
   					mut.reference = p[1].upcase
   					mut.position = substart+p[2] + 1
   					mut.mutant = nil
+						mut.seqname = @rname.to_s
   					mutations << mut
         end
       end
