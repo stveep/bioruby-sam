@@ -50,7 +50,8 @@ class Bio::Mutation < Hash
   end
 
   # TODO Look up in Ensembl VEP, return JSON - see Ensembl REST API docs for details
-  def vep
-
+  def vep(species="human",reference_type=nil)
+    EnsemblRest.connect_db
+    JSON.parse(EnsemblRest::Variation.vep_hgvs(species,self.to_hgvs(reference_type)))
   end
 end
