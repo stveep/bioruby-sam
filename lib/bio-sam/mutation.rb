@@ -1,4 +1,3 @@
-# Inherit from hash for easy json serialisation
 class Bio::Mutation
   attr_accessor :position, :type, :reference, :mutant, :seqname
   def initialize params={position: 1,type: :uninitialized, reference: nil, mutant: nil, seqname:nil}
@@ -8,6 +7,7 @@ class Bio::Mutation
     @mutant = params[:mutant]
     @seqname = params[:seqname]
   end
+
 
   # http://www.hgvs.org/mutnomen/recs.html
   # This gives just the annotation. To convert to a full allele description, needs to be combined
