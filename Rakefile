@@ -14,9 +14,9 @@ require 'rake'
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://guides.rubygems.org/specification-reference/ for more options
-  gem.name = "bioruby-sam"
+  gem.name = "bio-sam-mutation"
   gem.version = '0.2.0'
-  gem.homepage = "http://github.com/stveep/bioruby-sam"
+  gem.homepage = "http://github.com/stveep/bioruby-sam-mutation"
   gem.license = "MIT"
   gem.summary = %Q{Parsing and mutation calling from SAM, CIGAR and MD:Z.}
   gem.description = %Q{Simple classes for parsing SAM, CIGAR and MD:Z strings, including slices. Methods for calling mutations in HGVS format and looking up consequences using Ensembl VEP REST API. Developed for calling mutations at an expected position in an alignment - e.g. Amplicon sequencing of CRISPR-induced mutations.}
@@ -46,7 +46,7 @@ Rake::RDocTask.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
 
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "bio-sam #{version}"
+  rdoc.title = "bio-sam-mutation #{version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end

@@ -1,7 +1,3 @@
-class Bio::Alignment::SAM
-
-end
-
 class Bio::DB::Tag::MD
 	include Bio::Alignment::IteratePairs
 	attr_accessor :tag, :pairs, :cumulative
