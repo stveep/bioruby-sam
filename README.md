@@ -1,15 +1,17 @@
 # bio-sam
 
-[![Build Status](https://secure.travis-ci.org/stveep/bioruby-sam.png)](http://travis-ci.org/stveep/bioruby-sam)
+[![Build Status](https://secure.travis-ci.org/stveep/bioruby-sam-mutation.png)](http://travis-ci.org/stveep/bioruby-sam-mutation)
 
-Full description goes here
+*	Methods for calling mutations from SAM alignments, including CIGAR and MD tag parsers.
 
-Note: this software is under active development!
+*	Annotates mutations in HGVS format: http://www.hgvs.org/mutnomen/recs.html.
+
+*	Incorporates Ensembl VEP lookup.
 
 ## Installation
 
 ```sh
-gem install bio-sam
+gem install bio-sam-mutation
 ```
 
 ## Usage

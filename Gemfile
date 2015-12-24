@@ -13,7 +13,7 @@ group :development do
   gem "shoulda", ">= 0"
   gem "rdoc", "~> 3.12"
   gem "simplecov", ">= 0"
-  gem "jeweler", "~> 2.0.1"
-  gem "bundler", "~> 1.10.6"
-  gem "test-unit", "~> 3.0.8"
+  gem "jeweler", "~> 2.0"
+  gem "bundler", "~> 1.10"
+  gem "test-unit", "~> 3.0"
 end

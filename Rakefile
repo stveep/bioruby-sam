@@ -15,7 +15,7 @@ require 'jeweler'
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://guides.rubygems.org/specification-reference/ for more options
   gem.name = "bio-sam-mutation"
-  gem.version = '0.2.0'
+  gem.version = '0.3.0'
   gem.homepage = "http://github.com/stveep/bioruby-sam-mutation"
   gem.license = "MIT"
   gem.summary = %Q{Parsing and mutation calling from SAM, CIGAR and MD:Z.}
