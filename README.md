@@ -1,4 +1,4 @@
-# bio-sam
+# bio-sam-mutation
 
 [![Build Status](https://secure.travis-ci.org/stveep/bioruby-sam-mutation.png)](http://travis-ci.org/stveep/bioruby-sam-mutation)
 
@@ -68,7 +68,7 @@ the source tree.
 Information on the source tree, documentation, examples, issues and
 how to contribute, see
 
-  http://github.com/stveep/bioruby-sam
+  http://github.com/stveep/bioruby-sam-mutation
 
 The BioRuby community is on IRC server: irc.freenode.org, channel: #bioruby.
 
