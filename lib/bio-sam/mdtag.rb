@@ -1,4 +1,8 @@
-class Bio::Alignment::SAM::MDZ
+class Bio::Alignment::SAM
+
+end
+
+class Bio::DB::Tag::MD
 	include Bio::Alignment::IteratePairs
 	attr_accessor :tag, :pairs, :cumulative
 	@@regexp = /MD:Z:([\w^]+)/
@@ -6,15 +10,23 @@ class Bio::Alignment::SAM::MDZ
 	@@splitter = /(?<match>\d+)|(?<substitution>[GATC]+)|\^(?<deletion>[GATC]+)/
 	# Operations that consume reference seqeunce:
 	@@reference = /[msd]/
-	def initialize(string)
-		if string.match(@@regexp)
-			@tag = $~[1]
-		elsif string.match(@@format)
-			#Assume tag given without MD:Z: leader
-			@tag = string
-		else
-			raise "Tag not of expected format."
-		end
+	def initialize(data)
+			if data.is_a? String
+				if data.match(@@regexp)
+					@tag = $~[1]
+				elsif data.match(@@format)
+					#Assume tag given without MD:Z: leader
+					@tag = data
+				else
+					raise "Tag not of expected format."
+				end
+			elsif data.is_a? Bio::DB::Tag
+				@tag = data.value
+				warn "Not an MD tag" if data.tag == "MD"
+			else
+				raise "Tag not of expected format."
+			end
+
 		# Splits the string into operations using the splitter regexp class variable, returns array of two-element arrays describing operations
 		spl = @tag.scan(@@splitter)
 		# Returns an array of matches [match,substition,deletion]
@@ -109,7 +121,7 @@ class Bio::Alignment::SAM::MDZ
 		new_array = iterate_pairs(@pairs,offset,length,@@reference)
 		# Return a MDZ instance with just the new alignment
 		new_tag = reconstruct_tag(new_array)
-		Bio::Alignment::SAM::MDZ.new(new_tag)
+		Bio::DB::Tag::MD.new(new_tag)
 	end
 
 end

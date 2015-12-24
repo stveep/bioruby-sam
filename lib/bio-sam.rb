@@ -10,6 +10,7 @@
 
 require 'bio'
 require 'bio-ensembl-rest'
+require 'bio-samtools'
 require 'oj'
 require 'yaml'
 require 'bio-sam/sam'
