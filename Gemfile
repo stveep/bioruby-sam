@@ -4,7 +4,7 @@ source "http://rubygems.org"
   # Using edge version due to a problem with ruby >2.1 in biogems version at time of writing 
   gem "bio-samtools", "~>2.3.4", git: "https://github.com/helios/bioruby-samtools.git", ref: "2e77274"
   # JSON serialisation:
-  gem "oj", "~>2.14.0"
+  gem "oj", "~>2.14"
   # At the time of writing, the released version 0.2.0 does not include the variation#vep_hgvs method
   # so use this specific commit:
   gem "bio-ensembl-rest", "0.2.0", git: "https://github.com/ALTree/bio-ensembl-rest.git", ref: "c934fa0"
