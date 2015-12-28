@@ -3,40 +3,54 @@ Bio::DB::Alignment.class_eval do
 	# Aliases included for more intuitive naming when using for genomic alignments:
 	alias_method :chr, :rname
 	alias_method :opt, :tags # vice versa as opt is the "proper" sam name for the tag fields
+	attr_accessor :cigar_obj
 
-	# def initialize(line)
-	# 	@fields = line.split(/\s+/)
-	# 	@qname, @flag, @rname, @pos, @mapq, cigar, @mrnm, @mpos, @isize, @seq, @qual = @fields
-  #   @cigar = Bio::Alignment::CIGAR.new(cigar,@seq,source="sam")
-	# 	@tags = @fields[11..-1]
-	# 	@h = Hash.new{|k,v| @h[k] = ""}
-	# 	@h[:unsplit_tags] = @tags.join(" ")
-	# 	# Reconstruct the tag and assign a value. Assumes all tags are of the form X:Y:stuff
-	# 	@tags.map!{|tag| tag.split(/:/,3)}
-	# 	@tags.each{|a,b,c| @h[a + ":" + b] = c}
-	# 	@tags = @h
-	# 	@pos = @pos.to_i
-	# 	@mapq = @mapq.to_i
-	# 	@mrnm == "*" ? @mrnm = nil : @mrnm = @mrnm
-	# 	@mpos == "0" ? @mpos = nil : @mpos = @mpos.to_i
-	# 	@isize == "0" ? @isize = nil : @isize = @isize.to_i
-	# 	@seq = Bio::Sequence::NA.new(@seq)
-	# end
-
-  # Extend getter methods for these as they will be set to objects by the mutations method
-	# def cigar
-	# 	@cigar.is_a? Bio::Alignment::CIGAR ? @cigar.string : @cigar
-	# end
-	#
-	# def seq
-	# 	@seq.is_a? Bio::Sequence::NA ? @seq.seq : @seq
-	# end
+	# Output a representation of the query sequence
+	def query offset=1, length=@seq.length, reference_pos=@pos-1, ins_chr="_"
+	  mutations = self.mutations(offset,length,reference_pos)
+		pointer = offset-1
+		output = []
+		deletions = 0
+		insertions = 0
+		if mutations
+			mutations.each do |mut|
+				case mut.type
+					when :deletion
+						# position for deletion is the first deleted base
+						fillin = mut.position-1-reference_pos-1
+				    output << @seq[pointer..fillin] if fillin > pointer
+						mut.reference.length.times{ output << "-" }
+						pointer += fillin - pointer + 1
+						deletions += mut.reference.length
+					when :insertion
+						# position for insertion is the base we want
+						fillin = mut.position-reference_pos-1
+						output << @seq[pointer..fillin] if fillin > pointer
+						output << ins_chr + mut.mutant.downcase + ins_chr
+						pointer += fillin - pointer + 1 + mut.mutant.length
+						insertions += mut.mutant.length
+					when :substitution
+						# position for deletion is the first deleted base
+						fillin = mut.position-1-reference_pos-1
+				    output << @seq[pointer..fillin] if fillin > pointer
+						output << mut.mutant.downcase
+						pointer += fillin - pointer + 1 + mut.mutant.length
+				end
+			end
+		end
+		# Remaining sequence
+		if offset + length > pointer
+      output << @seq[pointer..offset-1+length-1-deletions+insertions]
+		end
+		output.join
+	end
 
   # Call mutations
   # Want to be able to give a length and offset - use this to generate appropriate sub CIGARs, subMDs & call
 	def mutations offset=1, length=@seq.length, reference_pos=@pos-1, translation_start=1
 		seq = Bio::Sequence::NA.new(@seq)
 		cigar = Bio::Alignment::CIGAR.new(@cigar,seq,source="sam")
+		@cigar_obj = cigar
     # Generate subalignments from the CIGAR and MD:Z
     subcigar = cigar.subalignment(offset,length)
     mdz = Bio::DB::Tag::MD.new(@tags["MD"].value)
@@ -72,7 +86,7 @@ Bio::DB::Alignment.class_eval do
 					mut = Bio::Mutation.new
 					mut.type = :insertion
 					mut.reference = nil
-					mut.position = reference_pos
+					mut.position = reference_pos + offset - 1
 					mut.mutant = (insertions.length == 0) ? "N" : insertions.shift.upcase
 					mut.seqname = @rname.to_s
           mutations << mut
@@ -94,6 +108,9 @@ Bio::DB::Alignment.class_eval do
         substart = @pos + offset - translation_start - 1
         case p[0]
           when "s"
+						puts "substart:" + substart.to_s
+						puts "read_position:" + read_position.to_s
+						puts p.inspect
             mut = Bio::Mutation.new
             mut.type = :substitution
             mut.position = substart+p[2] + 1
@@ -102,6 +119,9 @@ Bio::DB::Alignment.class_eval do
 						mut.seqname = @rname.to_s
             mutations << mut
           when "d"
+						puts "substart:" + substart.to_s
+						puts "read_position:" + read_position.to_s
+						puts p.inspect
             mut = Bio::Mutation.new
   					mut.type = :deletion
   					mut.reference = p[1].upcase
