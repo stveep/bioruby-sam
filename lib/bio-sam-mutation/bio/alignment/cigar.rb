@@ -18,7 +18,7 @@ class Bio::Alignment::CIGAR
 	@@subexp = /([atgcAGCT]+)>([atgcAGTC]+)/
 	attr_accessor :pairs, :reference
 
-	def initialize(string,ref,source="")
+	def initialize(string,ref=nil,source="")
 		# strip out whitespace
 		string.gsub!(/\s+/,"")
 
@@ -43,7 +43,7 @@ class Bio::Alignment::CIGAR
 			@pairs.map!{|pair| [pair[1].to_s, pair[0].to_i]}
 		end
 
-		# Include reference sequence
+		# Include reference sequence if provided
 		@reference = ref
 		# Check length of reference = sum(M+D)?
 		#warn "Reference length is not equal to that implied by CIGAR string: #{@reference.length}, #{self.reference_length}." unless @reference.length == self.reference_length
@@ -107,10 +107,6 @@ class Bio::Alignment::CIGAR
 		count_type(/[MHSI]/)
 	end
 
-	def low_quality
-	# Return regions of low quality alignment, sliding windows with < 50% M ?
-	end
-
 	# Output a representation of the query: replace deleted portions with "-", flag insertions with "*" or sim. Optionally provide the sequence (or symbols to use) of insertions, in order of appearence.
 	# Should be able to accept an array
 	# TODO: Add support for substitution highlighting (e.g lowercasing)
@@ -141,61 +137,8 @@ class Bio::Alignment::CIGAR
 		sequence.join("")
 	end
 
-	def mutations(reference_pos=0,insertions=[],subexp=@@subexp,*subs)
-		if insertions
-			if insertions.is_a? String
-				insertions = [insertions]
-			end
-		end
-		first_match = true
-		total = 0
-		mutations = []
-		@pairs.each do |pair|
-			case pair[0]
-				when "M"
-					#break if first_match == false
-					reference_pos += pair[1]
-					total += pair[1]
-					first_match = false
-				when "D"
-					mut = Bio::Mutation.new
-					mut.type = :deletion
-					mut.reference = @reference[total,pair[1]].upcase
-					mut.position = (reference_pos + 1).to_s
-					mut.mutant = nil
-					mutations << mut
-					total += pair[1]
-				when "I"
-					mut = Bio::Mutation.new
-					mut.type = :insertion
-					mut.reference = nil
-					mut.position = reference_pos.to_s
-					mut.mutant = (insertions.length == 0) ? "N" : insertions.shift.upcase
-          mutations << mut
-			end
-		end
-		# Use for substitutions, but could also pass any other annotation to include in here, as an array of strings
-		# Bit of a hack, assumes 123X>Y notation given from elsewhere - but this needs MD tag so can't be called only from CIGAR.
-		# TODO abstract this part to the SAM class and call from there - better logic
-		subs = subs.first # >1 arguments discarded
-		if subs
-			if (subs.length > 0 && (subs.is_a? Array))
-				subs.each do |substitution|
-					mut = Bio::Mutation.new
-					mut.type = :substition
-					mut.position = substitution.match(/\d+/)[0]
-					bases = substitution.match(subexp)
-					mut.reference = bases[1]
-					mut.mutant = bases[2]
-					mutations << mut
-				end
-			end
-		end
-		mutations.sort{|x| x.position}
-	end
-
-
 	# Output hgnc variant format given reference position. Only deletions can be accurately annotated from the cigar string; insertions or wild type seqeunces return nil
+	# NB mutation calling and annotation now implemented as extension to Bio::DB::Alignment (SAM)
 	def hgnc(reference_pos=0,insertions=[],type="g",*subs)
 		if insertions
 			if insertions.is_a? String
