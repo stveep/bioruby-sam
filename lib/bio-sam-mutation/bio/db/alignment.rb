@@ -108,9 +108,6 @@ Bio::DB::Alignment.class_eval do
         substart = @pos + offset - translation_start - 1
         case p[0]
           when "s"
-						puts "substart:" + substart.to_s
-						puts "read_position:" + read_position.to_s
-						puts p.inspect
             mut = Bio::Mutation.new
             mut.type = :substitution
             mut.position = substart+p[2] + 1
@@ -119,9 +116,6 @@ Bio::DB::Alignment.class_eval do
 						mut.seqname = @rname.to_s
             mutations << mut
           when "d"
-						puts "substart:" + substart.to_s
-						puts "read_position:" + read_position.to_s
-						puts p.inspect
             mut = Bio::Mutation.new
   					mut.type = :deletion
   					mut.reference = p[1].upcase
