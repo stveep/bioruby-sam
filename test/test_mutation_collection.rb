@@ -1,0 +1,8 @@
+require 'helper'
+class MutationCollectionTest < Test::Unit::TestCase
+  def test_hgvs
+		sub_del_ins = Bio::DB::Alignment.new "OR1FQ:00021:00043	0	ENST00000366794	936	70	128M1D16M1I38M	*	0	0	ACTCATCTTCAACAAGCAGCAAGTGCCTTCTGGGGAGTCGGCGATCTTGGACCGAGTAGCCGATGGCATGGTGTTCGGTGCCCTCCTTCCCTGCGAGGAATGCTCGGGTCAGCTGGTCTTCAAGAGCGTGCCTATTACTGCACTGGGGGACGTCACTGCCTGGACCAAGTGTATGGTCAAGAC	CCCCCCCDB@?=<B7;;<<<A7?@FCDDABBCCD;C???BAB?@@?CAC@CC>??C@;;;7;;;/8/000+.;;8/@7<;;;1;;7;7;;1>BBCCDAD;???;;;C:;;C;;;?@@BC=;;7;;<00...)-55357DC<<6;;;;;,66;;;;;;6606606<:@@;5;44--)--.)---	PG:Z:novoalign	AS:i:121	UQ:i:121	NM:i:3	MD:Z:60T67^A54"
+		# Using MutationArray collection method:
+		assert_equal "ENST00000366794:c.[996T>C;1064delA;1079_1080insG]", sub_del_ins.mutations.to_hgvs("c")
+  end
+end

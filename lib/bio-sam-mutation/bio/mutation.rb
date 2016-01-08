@@ -3,12 +3,11 @@ class Bio::MutationArray < Array
     if length == 1
       first.to_hgvs(reference_type)
     elsif length > 1
-      hgvs = [first.seqname,":",reference_type,".["]
-      each{|mutation| hgvs << mutation.to_hgvs(reference_type)}
-      hgvs.join("")
+      [first.seqname,":",reference_type,".["].join + map(&:to_hgvs).join(";") + "]"
     elsif length == 0
       nil
     end
+  end
 end
 
 class Bio::Mutation

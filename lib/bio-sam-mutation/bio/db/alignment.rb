@@ -47,7 +47,7 @@ Bio::DB::Alignment.class_eval do
 						pointer += fillin - pointer + 1 + mut.mutant.length
 						insertions += mut.mutant.length
 					when :substitution
-						# position for deletion is the first deleted base
+						# position for substitution is the first subbed base
 						fillin = mut.position-1-reference_pos-1
 				    output << @seq[pointer..fillin] if fillin > pointer
 						output << mut.mutant.downcase
@@ -143,7 +143,9 @@ Bio::DB::Alignment.class_eval do
         end
       end
     end
-    mutations.length > 0 ? mutations.sort{|x,y| x.position.to_i <=> y.position.to_i} : nil
+    # mutations.length > 0 ? mutations.sort{|x,y| x.position.to_i <=> y.position.to_i} : nil
+    mutations.length > 0 ? Bio::MutationArray.new(mutations.sort) : nil
+
   end
 
 	def regenerate_string
