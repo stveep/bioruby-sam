@@ -1,5 +1,8 @@
 class Bio::MutationArray < Array
   def to_hgvs(reference_type=nil)
+    if length > 0 && reference_type.nil?
+      reference_type ||= first.seqname.match(/^ENS/) ? "c" : "g"
+    end
     if length == 1
       first.to_hgvs(reference_type)
     elsif length > 1
@@ -68,7 +71,7 @@ class Bio::Mutation
   def vep(species="human",reference_type=nil)
     if reference_type.nil?
       reference_type ||= @seqname.match(/^ENS/) ? "c" : "g"
-    end  
+    end
     EnsemblRest.connect_db
     JSON.parse(EnsemblRest::Variation.vep_hgvs(species,self.to_hgvs(reference_type)))
   end
