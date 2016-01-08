@@ -79,6 +79,15 @@ class SAMTest < Test::Unit::TestCase
 		assert_equal 852, substitution.mutations(55,20,936,145)[0].position
 		assert_equal "ENST00000366794", substitution.mutations[0].seqname
 	end
+
+	def test_cdna_mutation
+	parp1	=	Bio::DB::Alignment.new("OR1FQ:00028:00030	0	ENST00000366794	342	70	66M1D88M6D70M8S	*	0	0	CCCTGACGTTGAGGTGGATGGGTTCTCTGAGCTTCGGTGGGATGATCAGCAGAAAGTCAAGAAGACGCGGAAGCTGGAGGAGTGACAGGCAAAGGCCAGGATGGAATTGGTAGCAAGGCAGAGAAGACTCTGGGTGACTTTGCAGCAGAGTATGCCAACAGAAGTACGTGCAAGGGGTGTATGGAGAAGATAGAAAAGGGCCAGGTGCGCCTGTCCAAGAAGATGGCTGAGG	;;1;;;;6606660;B?A<<<1?ACCDC?@;;;A<;7;<<16B==BDB@@@;;;1;@@@:;/*/;/0--)-)-C660>B@=?@D?;;;7;;;1;7;@;;7;;;64.4.4.454;;6;=@CFDCC@?>;@A;;>:;CACCC>CCCCCCCCCCCCCC@C>@@CCACCCCECC@@6:::.::::>D>?>CACEC?>1<<(00*0*0/6777?A??C??6;?;;6;@::;?CDCD>	PG:Z:novoalign	AS:i:234	UQ:i:234	NM:i:8	MD:Z:45C20^A88^CCAAGT70")
+		response = parp1.mutations(140,40,342,145).first.vep("human","c")
+		assert_equal "ENST00000366794:c.353_358delCCAAGT", parp1.mutations(140,40,342,145).first.to_hgvs("c")
+		assert_equal "CCAAGT/-", response.first["allele_string"]
+		assert_equal 226392243, response.first["start"]
+	end
+
 	def test_nil_if_no_mutation
 		no_mut = Bio::DB::Alignment.new("DKNQZ:00025:00303	0	5	1	37	75M	*	0	0	GCAGTAATTTCCCTGGAGTAAAACTGCGGTCAAAAATGTCCCTCCGTTCTTATGGAAGCCGGAAGGAAGTCTGTA	CCCCCC@CE>CC<CC@CB;;;;.;;;;;AC;::::+:92A:=CCAEE=?>;=:@<B?:<6<*/*/*/*/911112	XT:A:U	NM:i:3	X0:i:1	X1:i:0	XM:i:3	XO:i:1	XG:i:1	MD:Z:75")
 	  assert_nil no_mut.mutations
@@ -104,4 +113,18 @@ class SAMTest < Test::Unit::TestCase
 		sub_del_ins = Bio::DB::Alignment.new "OR1FQ:00021:00043	0	ENST00000366794	936	70	128M1D16M1I38M	*	0	0	ACTCATCTTCAACAAGCAGCAAGTGCCTTCTGGGGAGTCGGCGATCTTGGACCGAGTAGCCGATGGCATGGTGTTCGGTGCCCTCCTTCCCTGCGAGGAATGCTCGGGTCAGCTGGTCTTCAAGAGCGTGCCTATTACTGCACTGGGGGACGTCACTGCCTGGACCAAGTGTATGGTCAAGAC	CCCCCCCDB@?=<B7;;<<<A7?@FCDDABBCCD;C???BAB?@@?CAC@CC>??C@;;;7;;;/8/000+.;;8/@7<;;;1;;7;7;;1>BBCCDAD;???;;;C:;;C;;;?@@BC=;;7;;<00...)-55357DC<<6;;;;;,66;;;;;;6606606<:@@;5;44--)--.)---	PG:Z:novoalign	AS:i:121	UQ:i:121	NM:i:3	MD:Z:60T67^A54"
 		assert_equal "996T>C;1064delA;1079_1080insG", sub_del_ins.mutations.map{|m| m.to_hgvs}.join(";")
 	end
+
+	def test_add_tag
+		sub_del_ins = Bio::DB::Alignment.new "OR1FQ:00021:00043	0	ENST00000366794	936	70	128M1D16M1I38M	*	0	0	ACTCATCTTCAACAAGCAGCAAGTGCCTTCTGGGGAGTCGGCGATCTTGGACCGAGTAGCCGATGGCATGGTGTTCGGTGCCCTCCTTCCCTGCGAGGAATGCTCGGGTCAGCTGGTCTTCAAGAGCGTGCCTATTACTGCACTGGGGGACGTCACTGCCTGGACCAAGTGTATGGTCAAGAC	CCCCCCCDB@?=<B7;;<<<A7?@FCDDABBCCD;C???BAB?@@?CAC@CC>??C@;;;7;;;/8/000+.;;8/@7<;;;1;;7;7;;1>BBCCDAD;???;;;C:;;C;;;?@@BC=;;7;;<00...)-55357DC<<6;;;;;,66;;;;;;6606606<:@@;5;44--)--.)---	PG:Z:novoalign	AS:i:121	UQ:i:121	NM:i:3	MD:Z:60T67^A54"
+		sub_del_ins.add_tag!("TE:s:TTAG")
+		assert_equal "TTAG", sub_del_ins.tags["TE"].value
+
+		tag_obj = Bio::DB::Tag.new
+		tag_obj.set("TA:g:Object")
+		sub_del_ins.add_tag!(tag_obj)
+		assert_equal "Object", sub_del_ins.tags["TA"].value
+
+		 assert_match "TA:g:Object", sub_del_ins.sam_string
+	end
+
 end

@@ -5,6 +5,23 @@ Bio::DB::Alignment.class_eval do
 	alias_method :opt, :tags # vice versa as opt is the "proper" sam name for the tag fields
 	attr_accessor :cigar_obj
 
+	def add_tag!(new_tag)
+		if new_tag.is_a? String
+			new_tag_obj = Bio::DB::Tag.new
+			new_tag_obj.set(new_tag)
+			new_tag = new_tag_obj
+		else
+			raise "Tag not recognised - pass a string or Bio::DB::Tag object" unless new_tag.is_a? Bio::DB::Tag
+		end
+		@tags[new_tag.tag] = new_tag
+
+		regenerate_string
+	end
+
+	def add_tag(tag)
+		dup.add_tag!(tag)
+	end
+
 	# Output a representation of the query sequence
 	def query offset=1, length=@seq.length, reference_pos=@pos-1, ins_chr="_"
 	  mutations = self.mutations(offset,length,reference_pos)
@@ -128,4 +145,20 @@ Bio::DB::Alignment.class_eval do
     end
     mutations.length > 0 ? mutations.sort{|x,y| x.position.to_i <=> y.position.to_i} : nil
   end
+
+	def regenerate_string
+		tags_string = @tags.map{|k,v| [v.tag, v.type, v.value].join(":") }
+		self.sam_string = [@qname,
+	        @flag,
+	        @rname,
+	        @pos,
+	        @mapq,
+	        @cigar,
+	        @mrnm,
+	        @mpos,
+	        @isize,
+	        @seq,
+	        @qual,
+	        tags_string].join("\t")
+	end
 end
