@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+require 'bio-sam-mutation'
+require 'thor'
+
+class SamMutationCLI < Thor
+  desc "tag [--config=config.yml]", "Tag a SAM file with HGVS annotations."
+  option :config
+  def tag (file_name)
+    File.open(file_name).each do |line|
+      puts line
+      next if line.match(/^@/)
+      sam = Bio::DB::Alignment.new(line)
+      puts sam.inspect
+      new_tag = Bio::DB::Tag.new("HG:i:"+sam.mutations.to_hgvs)
+      puts sam.add_tag(new_tag)
+    end
+  end
+end
+
+SamMutationCLI.start ARGV

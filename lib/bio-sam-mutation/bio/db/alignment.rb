@@ -7,9 +7,9 @@ Bio::DB::Alignment.class_eval do
 
 	def add_tag!(new_tag)
 		if new_tag.is_a? String
-			new_tag_obj = Bio::DB::Tag.new
-			new_tag_obj.set(new_tag)
-			new_tag = new_tag_obj
+			new_tag = Bio::DB::Tag.new(new_tag)
+			# new_tag_obj.set(new_tag)
+			# new_tag = new_tag_obj
 		else
 			raise "Tag not recognised - pass a string or Bio::DB::Tag object" unless new_tag.is_a? Bio::DB::Tag
 		end
@@ -65,6 +65,7 @@ Bio::DB::Alignment.class_eval do
   # Call mutations
   # Want to be able to give a length and offset - use this to generate appropriate sub CIGARs, subMDs & call
 	def mutations offset=1, length=@seq.length, reference_pos=@pos-1, translation_start=1
+		return nil if @query_unmapped
 		seq = Bio::Sequence::NA.new(@seq)
 		cigar = Bio::Alignment::CIGAR.new(@cigar,seq,source="sam")
 		@cigar_obj = cigar

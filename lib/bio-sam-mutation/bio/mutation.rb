@@ -66,6 +66,9 @@ class Bio::Mutation
 
   # TODO Require reference type - fails without. Assume g, unless matches ENS*T = c?
   def vep(species="human",reference_type=nil)
+    if reference_type.nil?
+      reference_type ||= @seqname.match(/^ENS/) ? "c" : "g"
+    end  
     EnsemblRest.connect_db
     JSON.parse(EnsemblRest::Variation.vep_hgvs(species,self.to_hgvs(reference_type)))
   end
