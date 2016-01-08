@@ -1,3 +1,16 @@
+class Bio::MutationArray < Array
+  def to_hgvs(reference_type=nil)
+    if length == 1
+      first.to_hgvs(reference_type)
+    elsif length > 1
+      hgvs = [first.seqname,":",reference_type,".["]
+      each{|mutation| hgvs << mutation.to_hgvs(reference_type)}
+      hgvs.join("")
+    elsif length == 0
+      nil
+    end
+end
+
 class Bio::Mutation
   attr_accessor :position, :type, :reference, :mutant, :seqname
   def initialize params={position: 1,type: :uninitialized, reference: nil, mutant: nil, seqname:nil}
@@ -8,6 +21,10 @@ class Bio::Mutation
     @seqname = params[:seqname]
   end
 
+  def <=> other
+    return 0 if self.position == other.position
+    self.position > other.position ? 1 : -1
+  end
 
   # http://www.hgvs.org/mutnomen/recs.html
   # This gives just the annotation. To convert to a full allele description, needs to be combined
