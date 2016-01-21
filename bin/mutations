@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+require 'trollop'
+require 'yaml'
+require 'bio-sam-mutation'
+
+opts = Trollop::options do
+  opt :config, "Configuration file in YAML format. Defaults to ./config.yml. Run with --example-config for example.", type: :string, default: "config.yml"
+  #opt :example_config, "Show example configuration file."
+  opt :output, "Output file.", type: :string
+end
+
+module MutationsCLI
+
+  def self.tag (sam, output_file)
+    if sam.match(/^@/)
+      output_file.puts sam
+      return
+    end
+    sam = Bio::DB::Alignment.new(sam)
+    if sam.mutations
+      new_tag = Bio::DB::Tag.new("YH:m:"+sam.mutations.to_hgvs)
+      output_file.puts sam.add_tag(new_tag)
+    end
+  end
+end
+# Trollop removes and parses the options, leaving either input files or the incoming stream:
+outfile = File.open(opts[:output],'w')
+config = YAML.load_file(opts[:config])
+ARGF.each do |input|
+  MutationsCLI.tag input, outfile
+end

@@ -23,7 +23,8 @@ Jeweler::Tasks.new do |gem|
   gem.email = "spettitt@gmail.com"
   gem.authors = ["Stephen Pettitt"]
   # dependencies defined in Gemfile
-  gem.required_ruby_version = '>= 1.9.3'
+  # gem.required_ruby_version = '>= 1.9.3'
+  gem.executables << "mutations"
 end
 Jeweler::RubygemsDotOrgTasks.new
 
