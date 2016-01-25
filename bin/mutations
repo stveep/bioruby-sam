@@ -10,22 +10,34 @@ opts = Trollop::options do
 end
 
 module MutationsCLI
+  @default_species = "human"
+  class << self
+    attr_accessor :default_species
+  end
 
-  def self.tag (sam, output_file)
+  def self.tag (sam, output_file, config, species=MutationsCLI.default_species)
     if sam.match(/^@/)
       output_file.puts sam
       return
     end
     sam = Bio::DB::Alignment.new(sam)
     if sam.mutations
-      new_tag = Bio::DB::Tag.new("YH:m:"+sam.mutations.to_hgvs)
+      new_tag = Bio::DB::Tag.new("YH:m:"+sam.mutations(config[:offset],config[:length],config[:translation_start]).to_hgvs)
       output_file.puts sam.add_tag(new_tag)
     end
+  end
+
+  def self.set_defaults config
+    config[:translation_start] ||= 1
+    config
   end
 end
 # Trollop removes and parses the options, leaving either input files or the incoming stream:
 outfile = File.open(opts[:output],'w')
 config = YAML.load_file(opts[:config])
-ARGF.each do |input|
-  MutationsCLI.tag input, outfile
+config = MutationsCLI.set_defaults(config)
+config[:products].each do |product|
+  ARGF.each do |input|
+    MutationsCLI.tag input, outfile, config
+  end
 end

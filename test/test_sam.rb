@@ -76,14 +76,14 @@ class SAMTest < Test::Unit::TestCase
 	def test_substitution_mutation_with_translation_pos
 		substitution = Bio::DB::Alignment.new("OR1FQ:00462:02257	0	ENST00000366794	936	70	193M43S	*	0	0	ACTCATCTTCAACAAGCAGCAAGTGCCTTCTGGGGAGTCGGCGATCTTGGACCGAGTAGCCGATGGCATGGTGTTCGGTGCCCTCCTTCCCTGCGAGGAATGCTCGGGTCAGCTGGTCTTCAAGAGCGATGCCTATTACTGCACTGGGGACGTCACTGCCTGGACCAAGTGTATGGTCAAGACACAGACACCCTCCACAGCCTCGGCTCCTGCTGCTGTGAACTCCTCTGCTGAGG	@BCACC@@@@DAFFADCCCCDEID@@?@ACCCDD:@??;<8<1..=>=<1111@@CD??@@CC@C@CFDCACCCADDABCCD?DD@CACD?CC??>C6;6;>>???E?C@??CCDACCC@CD@CCC><?A>>7;<<7<<<??;BBBBB/;;;;;BBBCC@CCACC=@7;;;;;;;6;@@7?@CCCCCC111<6<<+00>>>=CCD;??C@CCCC?????CCAC????CCECDDCDB	PG:Z:novoalign	AS:i:328	UQ:i:328	NM:i:1	MD:Z:60T132")
 		# offset, length, reference start, translation start
-		assert_equal 852, substitution.mutations(55,20,936,145)[0].position
+		assert_equal 852, substitution.mutations(55,20,145)[0].position
 		assert_equal "ENST00000366794", substitution.mutations[0].seqname
 	end
 
 	def test_cdna_mutation
 	parp1	=	Bio::DB::Alignment.new("OR1FQ:00028:00030	0	ENST00000366794	342	70	66M1D88M6D70M8S	*	0	0	CCCTGACGTTGAGGTGGATGGGTTCTCTGAGCTTCGGTGGGATGATCAGCAGAAAGTCAAGAAGACGCGGAAGCTGGAGGAGTGACAGGCAAAGGCCAGGATGGAATTGGTAGCAAGGCAGAGAAGACTCTGGGTGACTTTGCAGCAGAGTATGCCAACAGAAGTACGTGCAAGGGGTGTATGGAGAAGATAGAAAAGGGCCAGGTGCGCCTGTCCAAGAAGATGGCTGAGG	;;1;;;;6606660;B?A<<<1?ACCDC?@;;;A<;7;<<16B==BDB@@@;;;1;@@@:;/*/;/0--)-)-C660>B@=?@D?;;;7;;;1;7;@;;7;;;64.4.4.454;;6;=@CFDCC@?>;@A;;>:;CACCC>CCCCCCCCCCCCCC@C>@@CCACCCCECC@@6:::.::::>D>?>CACEC?>1<<(00*0*0/6777?A??C??6;?;;6;@::;?CDCD>	PG:Z:novoalign	AS:i:234	UQ:i:234	NM:i:8	MD:Z:45C20^A88^CCAAGT70")
-		response = parp1.mutations(140,40,342,145).first.vep("human","c")
-		assert_equal "ENST00000366794:c.353_358delCCAAGT", parp1.mutations(140,40,342,145).first.to_hgvs("c")
+		response = parp1.mutations(140,40,145).first.vep("human","c")
+		assert_equal "ENST00000366794:c.353_358delCCAAGT", parp1.mutations(140,40,145).first.to_hgvs("c")
 		assert_equal "CCAAGT/-", response.first["allele_string"]
 		assert_equal 226392243, response.first["start"]
 	end

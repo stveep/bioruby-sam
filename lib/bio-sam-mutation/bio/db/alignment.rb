@@ -24,7 +24,7 @@ Bio::DB::Alignment.class_eval do
 
 	# Output a representation of the query sequence
 	def query offset=1, length=@seq.length, reference_pos=@pos-1, ins_chr="_"
-	  mutations = self.mutations(offset,length,reference_pos)
+	  mutations = self.mutations(offset,length)
 		pointer = offset-1
 		output = []
 		deletions = 0
@@ -64,7 +64,7 @@ Bio::DB::Alignment.class_eval do
 
   # Call mutations
   # Want to be able to give a length and offset - use this to generate appropriate sub CIGARs, subMDs & call
-	def mutations offset=1, length=@seq.length, reference_pos=@pos-1, translation_start=1
+	def mutations offset=1, length=@seq.length, translation_start=1
 		return nil if @query_unmapped
 		seq = Bio::Sequence::NA.new(@seq)
 		cigar = Bio::Alignment::CIGAR.new(@cigar,seq,source="sam")
@@ -89,6 +89,7 @@ Bio::DB::Alignment.class_eval do
     first_match = true
 		total = 0
 		mutations = []
+		reference_pos = @pos - 1
 		subcigar.pairs.each do |pair|
 			case pair[0]
 				when "M"
