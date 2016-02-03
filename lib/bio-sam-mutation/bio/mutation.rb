@@ -1,7 +1,9 @@
 class Bio::MutationArray < Array
+  require 'vephgvs'
+  include VepHgvs
   def to_hgvs(reference_type=nil)
     if length > 0 && reference_type.nil?
-      reference_type ||= first.seqname.match(/^ENS/) ? "c" : "g"
+      reference_type = first.seqname.match(/^ENS/) ? "c" : "g"
     end
     if length == 1
       first.to_hgvs(reference_type)
@@ -68,9 +70,10 @@ class Bio::Mutation
   end
 
   # TODO Require reference type - fails without. Assume g, unless matches ENS*T = c?
+  # Can remove and include vephgvs instead
   def vep(species="human",reference_type=nil)
     if reference_type.nil?
-      reference_type ||= @seqname.match(/^ENS/) ? "c" : "g"
+      reference_type = @seqname.match(/^ENS/) ? "c" : "g"
     end
     EnsemblRest.connect_db
     JSON.parse(EnsemblRest::Variation.vep_hgvs(species,self.to_hgvs(reference_type)))

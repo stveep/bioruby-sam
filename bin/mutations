@@ -1,43 +1,56 @@
 #!/usr/bin/env ruby
 require 'trollop'
-require 'yaml'
 require 'bio-sam-mutation'
 
 opts = Trollop::options do
   opt :config, "Configuration file in YAML format. Defaults to ./config.yml. Run with --example-config for example.", type: :string, default: "config.yml"
-  #opt :example_config, "Show example configuration file."
-  opt :output, "Output file.", type: :string
+  opt :example_config, "Show example configuration file."
+  opt :output, "Output file, works with single product only. Better to define in config file.", type: :string, default: "output.sam"
+  opt :tag, "Tag an input SAM file (or piped stream of SAM data) with mutation calls"
+  opt :report, "Produce a report by amplicon for each file given (does not work on a stream)"
 end
 
-module MutationsCLI
-  @default_species = "human"
-  class << self
-    attr_accessor :default_species
-  end
-
-  def self.tag (sam, output_file, config, species=MutationsCLI.default_species)
-    if sam.match(/^@/)
-      output_file.puts sam
-      return
-    end
-    sam = Bio::DB::Alignment.new(sam)
-    if sam.mutations
-      new_tag = Bio::DB::Tag.new("YH:m:"+sam.mutations(config[:offset],config[:length],config[:translation_start]).to_hgvs)
-      output_file.puts sam.add_tag(new_tag)
-    end
-  end
-
-  def self.set_defaults config
-    config[:translation_start] ||= 1
-    config
-  end
-end
 # Trollop removes and parses the options, leaving either input files or the incoming stream:
-outfile = File.open(opts[:output],'w')
-config = YAML.load_file(opts[:config])
-config = MutationsCLI.set_defaults(config)
-config[:products].each do |product|
-  ARGF.each do |input|
-    MutationsCLI.tag input, outfile, config
+config = opts[:config]? YAML.load_file(opts[:config]) : {}
+if opts[:tag]
+if config.keys.include? :products
+  config[:products].each do |product_name, config_hash|
+    config[product_name] = MutationsCLI.set_defaults(config_hash)
   end
+  config = MutationsCLI.construct_products(config)
+else
+  config[:single_product] = true
+  config[:output] ||= opt[:output]
+  config[:outfile] = File.open(config[:output],'w')
+end
+
+  ARGF.each do |input|
+    MutationsCLI.tag input, config
+  end
+end
+
+if opts[:report]
+  config[:products].each do |product_name, config_hash|
+    config_hash = MutationsCLI.set_defaults(config_hash)
+    out = File.open(product_name+"-report.txt",'w')
+    ARGV.each do |file|
+      out.puts file
+      calls = Hash.new{|h,k| h[k] = MutantAllele.new}
+      File.open(file).readlines.each do |input|
+        next if input.match /^@/ # skip sam headers
+        sam = Bio::DB::Alignment.new(input)
+        key = sam.query(config_hash[:offset],config_hash[:length])
+        calls[key].mutations ||= MutationsCLI.call_mutations input, config_hash
+        calls[key].example ||= sam
+        calls[key].count += 1
+      end
+      calls.each do |seq, allele|
+        hgvs = allele.mutations.to_hgvs
+        vep = allele.mutations.lookup
+        formatted = VegHgvs.consequences_for_transcript(vep,config_hash[:product])
+        out.puts ([seq,hgvs,allele.count]+formatted["Mutation"]).join("\t")
+      end
+    end
+  end
+
 end

@@ -19,3 +19,7 @@ require 'bio-sam-mutation/bio/alignment/cigar'
 require 'bio-sam-mutation/bio/db/tag'
 require 'bio-sam-mutation/bio/db/tag/md'
 require 'bio-sam-mutation/bio/mutation'
+require 'bio-sam-mutation/bio/vephgvs'
+require 'bio-sam-mutation/bio/mutantallele'
+
+require 'bio-sam-mutation/mutationscli'
