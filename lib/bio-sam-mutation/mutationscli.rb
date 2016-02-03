@@ -55,7 +55,7 @@ module MutationsCLI
   end
 
   def self.set_defaults config_hash
-    config_hash[:start] ||= 1
+    config_hash[:start] ||= "." # i.e. regexp will match anything
     config_hash[:offset] ||= 1
     config_hash[:length] ||= 100
     config_hash[:translation_start] ||= 1

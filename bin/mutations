@@ -8,8 +8,12 @@ opts = Trollop::options do
   opt :example_config, "Show example configuration file."
   opt :output, "Output file, works with single product only. Better to define in config file.", type: :string, default: "output.sam"
   opt :tag, "Tag an input SAM file (or piped stream of SAM data) with mutation calls"
-  opt :report, "Produce a report by amplicon for each file given (does not work on a stream)"
+  opt :report, "Produce a report by amplicon for each file given, including read counts and annotation for each allele. (does not work on a stream)"
+  opt :mincov, "Minimum fraction of reads to report a mutant allele.", default: 0.01
+  opt :flag, "Minimum reads to flag a potential mutant (= no wild type).", default: 20
 end
+
+raise "Cannot use report and tag simultaneously." if opts[:report] && opts[:tag]
 
 # Trollop removes and parses the options, leaving either input files or the incoming stream:
 config = opts[:config]? YAML.load_file(opts[:config]) : {}
@@ -33,44 +37,63 @@ end
 if opts[:report]
   config[:products].each do |product_name, config_hash|
     config_hash = MutationsCLI.set_defaults(config_hash)
+    lookups = {}
     out = File.open(product_name+"-report.txt",'w')
+    mutants = []
     ARGV.each do |file|
-      out.puts file
       calls = Hash.new{|h,k| h[k] = MutantAllele.new}
       File.open(file).readlines.each do |input|
         next if input.match /^@/ # skip sam headers
-        puts input
         sam = Bio::DB::Alignment.new(input)
+        # Check correct start in case of file with mixed amplicons
+        if config_hash[:start]
+          next unless sam.seq.match Regexp.new("^"+config_hash[:start])
+        end
         # Must be have sufficient mapped length to call mutations in the given interval:
         next if sam.query_unmapped
         next if config_hash[:length] > Bio::Alignment::CIGAR.new(sam.cigar).reference_length - config_hash[:offset]
-        key = sam.query(config_hash[:offset],config_hash[:length])
-        calls[key].mutations ||= MutationsCLI.call_mutations_given_product sam, config_hash
+        key = "w.t."
+        muts = MutationsCLI.call_mutations_given_product sam, config_hash
+        if muts
+          key = muts.to_hgvs
+          calls[key].mutations ||= MutationsCLI.call_mutations_given_product sam, config_hash
+        end
+        calls[key].seq ||= sam.query(config_hash[:offset], config_hash[:length])
         calls[key].example ||= sam
         calls[key].count += 1
       end
+      total_reads = calls.map{|k,v| v.count}.reduce(:+)
+      out.puts file
+      out.puts "Total reads: total_reads"
+      threshold = total_reads ? opts[:mincov] * total_reads : 0
+      calls.keep_if{|k, v| v.count > threshold}
+      mutants << file unless calls.keys.include? "w.t." || total_reads < opts[:flag]
       calls = calls.sort_by{|k,v| v.count}.reverse.to_h
-      calls.each do |seq, allele|
+      calls.each do |key, allele|
         hgvs, vep = ""
         formatted = nil
         if allele.mutations
           hgvs = allele.mutations.to_hgvs
           if allele.mutations.size == 1 # VEP lookup doesn't work for compound mutations
             vep = allele.lookup
-            result = VepHgvs.consequences_for_transcript(vep,config_hash[:transcript]).first
+            result = lookups[hgvs] ? lookups[hgvs] : VepHgvs.consequences_for_transcript(vep,config_hash[:transcript]).first
             if result
-              formatted = [result["CDS position"].to_s+result["Allele"],result["Protein start"].to_s+result["Mutation"],result["Consequence"]].join("\t")
+              formatted = [result["CDS position"].to_s+" "+result["Allele"],result["Protein start"].to_s+" "+result["Mutation"],result["Consequence"]].join("\t")
             else
               formatted = "No VEP result"
             end
+            lookups[hgvs] ||= result
           else
             formatted = "Compound mutant"
           end
         end
         formatted ||= "No mutation"
-        out.puts ([seq,hgvs,allele.count,formatted]).join("\t")
+        out.puts ([allele.seq, allele.count, key, formatted]).join("\t")
       end
+      out.puts "\n===================================="
     end
+    out.puts "Files with wild type below threshold:"
+    out.puts mutants.join("\n")
   end
 
 end

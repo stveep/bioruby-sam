@@ -1,11 +1,11 @@
 class MutantAllele
-  attr_accessor :mutations, :count, :example
+  attr_accessor :mutations, :count, :example, :seq
   class << self
     attr_accessor :previous_lookups
   end
-  @previous_lookups = {}
+  self.previous_lookups = {}
 
-  def initialize (mutations: nil, count: 0, example: nil)
+  def initialize (mutations: nil, count: 0, example: nil, seq: nil)
     @mutations = mutations
     @count = count
     @example = example

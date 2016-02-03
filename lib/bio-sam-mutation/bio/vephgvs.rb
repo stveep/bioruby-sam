@@ -13,8 +13,8 @@ module VepHgvs
     if json_object.length > 0
       if json_object.first["transcript_consequences"]
         consequences = json_object.first["transcript_consequences"]
-        cons_of_interest = consequences.keep_if{|a| a["transcript_id"] == tscript}
-        cons_of_interest.map{|a| {"Allele" => json_object.first["allele_string"], "CDS position" => a["cds_start"], "Protein start" => a["protein_start"], "Mutation" => a["amino_acids"], "Consequence" => a["consequence_terms"]}}
+        consequences.keep_if{|a| a["transcript_id"] == tscript}
+        consequences.map{|a| {"Allele" => json_object.first["allele_string"], "CDS position" => a["cds_start"], "Protein start" => a["protein_start"], "Mutation" => a["amino_acids"], "Consequence" => a["consequence_terms"]}}
       end
     end
   end

@@ -1,4 +1,4 @@
-
+# TODO: remove to separate file
 module VepHgvs
   require 'bio-ensembl-rest'
   def vep(species="human",reference_type=nil)
