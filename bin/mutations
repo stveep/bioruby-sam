@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 require 'trollop'
 require 'bio-sam-mutation'
+require 'pry'
 
 opts = Trollop::options do
   opt :config, "Configuration file in YAML format. Defaults to ./config.yml. Run with --example-config for example.", type: :string, default: "config.yml"
@@ -38,17 +39,36 @@ if opts[:report]
       calls = Hash.new{|h,k| h[k] = MutantAllele.new}
       File.open(file).readlines.each do |input|
         next if input.match /^@/ # skip sam headers
+        puts input
         sam = Bio::DB::Alignment.new(input)
+        # Must be have sufficient mapped length to call mutations in the given interval:
+        next if sam.query_unmapped
+        next if config_hash[:length] > Bio::Alignment::CIGAR.new(sam.cigar).reference_length - config_hash[:offset]
         key = sam.query(config_hash[:offset],config_hash[:length])
-        calls[key].mutations ||= MutationsCLI.call_mutations input, config_hash
+        calls[key].mutations ||= MutationsCLI.call_mutations_given_product sam, config_hash
         calls[key].example ||= sam
         calls[key].count += 1
       end
+      calls = calls.sort_by{|k,v| v.count}.reverse.to_h
       calls.each do |seq, allele|
-        hgvs = allele.mutations.to_hgvs
-        vep = allele.mutations.lookup
-        formatted = VegHgvs.consequences_for_transcript(vep,config_hash[:product])
-        out.puts ([seq,hgvs,allele.count]+formatted["Mutation"]).join("\t")
+        hgvs, vep = ""
+        formatted = nil
+        if allele.mutations
+          hgvs = allele.mutations.to_hgvs
+          if allele.mutations.size == 1 # VEP lookup doesn't work for compound mutations
+            vep = allele.lookup
+            result = VepHgvs.consequences_for_transcript(vep,config_hash[:transcript]).first
+            if result
+              formatted = [result["CDS position"].to_s+result["Allele"],result["Protein start"].to_s+result["Mutation"],result["Consequence"]].join("\t")
+            else
+              formatted = "No VEP result"
+            end
+          else
+            formatted = "Compound mutant"
+          end
+        end
+        formatted ||= "No mutation"
+        out.puts ([seq,hgvs,allele.count,formatted]).join("\t")
       end
     end
   end

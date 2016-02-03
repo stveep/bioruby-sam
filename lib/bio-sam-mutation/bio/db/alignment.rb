@@ -64,11 +64,12 @@ Bio::DB::Alignment.class_eval do
 
   # Call mutations
   # Want to be able to give a length and offset - use this to generate appropriate sub CIGARs, subMDs & call
-	def mutations offset=1, length=@seq.length-1, translation_start=1
+	def mutations offset=1, length=nil, translation_start=1
 		return nil if @query_unmapped
-		return nil if offset+length > @seq.length
-		seq = Bio::Sequence::NA.new(@seq)
 		cigar = Bio::Alignment::CIGAR.new(@cigar,seq,source="sam")
+		length ||= cigar.reference_length - offset
+		return nil if offset+length > cigar.reference_length
+		seq = Bio::Sequence::NA.new(@seq)
 		@cigar_obj = cigar
     # Generate subalignments from the CIGAR and MD:Z
     subcigar = cigar.subalignment(offset,length)

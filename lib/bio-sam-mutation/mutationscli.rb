@@ -36,11 +36,15 @@ module MutationsCLI
   end
 
   # Returns a MutationArray
-  def self.call_mutations sam, config, species=MutationsCLI.default_species
+  def self.call_mutations sam, config
     unless config[:single_product]
       first_bases = sam.seq[0..config[:start_length]-1].upcase
       config[first_bases] ? config = config[first_bases] : return
     end
+    MutationsCLI.call_mutations_given_product sam, config
+  end
+
+  def self.call_mutations_given_product sam, config
     # Stop if a search file is specified, and this isn't it.
     return if MutationsCLI.not_included_file?(config, ARGF)
     sam.mutations(config[:offset],config[:length],config[:translation_start])
