@@ -11,11 +11,17 @@
 
 class Bio::Alignment::CIGAR
 	include Bio::Alignment::IteratePairs
-	@@regexps = {"exonerate" => /([MIDNSHP]{1})(\d+)/, "sam" => /(\d+)([MIDNSHP]{1})/}
+
+	class << self
+		attr_accessor :reference_operations, :query_operations, :subexp, :regexps
+	end
+
+	self.regexps = {"exonerate" => /([MIDNSHP]{1})(\d+)/, "sam" => /(\d+)([MIDNSHP]{1})/}
 	# Type of elements that count towards the reference length:
 	# TODO: add full support for other elements S, H etc.
-	@@reference = /[MD]/
-	@@subexp = /([atgcAGCT]+)>([atgcAGTC]+)/
+	self.reference_operations = /[MD]/
+	self.query_operations = /[MIS]/
+	self.subexp = /([atgcAGCT]+)>([atgcAGTC]+)/
 	attr_accessor :pairs, :reference
 
 	def initialize(string,ref=nil,source="")
@@ -23,8 +29,8 @@ class Bio::Alignment::CIGAR
 		string.gsub!(/\s+/,"")
 
 		# Auto-detect source if not supplied
-		if !(@@regexps.keys.include? source)
-		  @@regexps.each do |k,v|
+		if !(Bio::Alignment::CIGAR.regexps.keys.include? source)
+		  Bio::Alignment::CIGAR.regexps.each do |k,v|
 				# Look for match at start of string
 				if m = string.match(v)
 				  source = k if m.offset(0)[0] == 0
@@ -35,7 +41,7 @@ class Bio::Alignment::CIGAR
 			end
     end
 		# Make an array of pairs of of cigar elements:
-		@pairs = string.scan(@@regexps[source])
+		@pairs = string.scan(Bio::Alignment::CIGAR.regexps[source])
 		if source == "exonerate"
 			@pairs.map!{|pair| [pair[0].to_s, pair[1].to_i]}
 		else
@@ -51,7 +57,7 @@ class Bio::Alignment::CIGAR
 	end
 
 	# Given an offset in reference sequence and length, return an object corresponding to that subregion of the alignment
-	def subalignment(offset,length,regexp=@@reference)
+	def subalignment(offset,length,regexp=Bio::Alignment::CIGAR.reference_operations)
 		new_array = iterate_pairs(@pairs,offset,length,regexp)
 		# Return a CIGAR instance with just the new alignment
 		new_string = new_array.join(" ")
@@ -100,11 +106,11 @@ class Bio::Alignment::CIGAR
 	end
 
 	def reference_length
-		count_type(@@reference)
+		count_type(Bio::Alignment::CIGAR.reference_operations)
 	end
 
 	def query_length
-		count_type(/[MHSI]/)
+		count_type(Bio::Alignment::CIGAR.query_operations)
 	end
 
 	# Output a representation of the query: replace deleted portions with "-", flag insertions with "*" or sim. Optionally provide the sequence (or symbols to use) of insertions, in order of appearence.
@@ -203,8 +209,8 @@ class Bio::Alignment::CIGAR
 			if pair[0].match(type)
 				hash[$&] << [total, pair[1], qtotal]
 			end
-			total += pair[1] if pair[0].match(@@reference)
-			qtotal += pair[1]
+			total += pair[1] if pair[0].match Bio::Alignment::CIGAR.reference_operations
+			qtotal += pair[1] if pair[0].match Bio::Alignment::CIGAR.query_operations
 		end
 		hash
 	end

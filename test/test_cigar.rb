@@ -108,7 +108,7 @@ class CigarTest < Test::Unit::TestCase
     i = Bio::Alignment::CIGAR.new("M 5 I 10 M 6","AAAATAAAATA")
 		assert_equal({"I" => [[5, 10, 5]]}, i.positions(/I/))
     d = Bio::Alignment::CIGAR.new("M 5 D 2 M 4","AAAATAAAATA")
-		assert_equal({"M" => [[0,5,0],[7,4,7]], "D" => [[5,2,5]]},d.positions(/[MD]/))
+		assert_equal({"M" => [[0,5,0],[7,4,5]], "D" => [[5,2,5]]},d.positions(/[MD]/))
 	end
 	def test_positions_on_query
 		i = Bio::Alignment::CIGAR.new("M 5 I 10 D 3 M 6","AAAATAAAATA")

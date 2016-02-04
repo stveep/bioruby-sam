@@ -102,12 +102,12 @@ Bio::DB::Alignment.class_eval do
         # Call deletions using the MD:Z tag - avoid need to supply reference seq.
 				when "D"
 				# Deletions are called below but still need to count here
-				  total += pair[1]
+				  reference_pos += pair[1]
 				when "I"
 					mut = Bio::Mutation.new
 					mut.type = :insertion
 					mut.reference = nil
-					mut.position = reference_pos + offset - 1
+					mut.position = reference_pos + offset - translation_start
 					mut.mutant = (insertions.length == 0) ? "N" : insertions.shift.upcase
 					mut.seqname = @rname.to_s
           mutations << mut

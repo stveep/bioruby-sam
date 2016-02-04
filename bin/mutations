@@ -57,7 +57,7 @@ if opts[:report]
         muts = MutationsCLI.call_mutations_given_product sam, config_hash
         if muts
           key = muts.to_hgvs
-          calls[key].mutations ||= MutationsCLI.call_mutations_given_product sam, config_hash
+          calls[key].mutations ||= muts
         end
         calls[key].seq ||= sam.query(config_hash[:offset], config_hash[:length])
         calls[key].example ||= sam
