@@ -116,6 +116,7 @@ Bio::DB::Alignment.class_eval do
 
     # Now substitutions & deletions - these need the MD tag
     sub_pos = mdz.report(/[sd]/)
+		previous_sub_position = 0
 		unless sub_pos.empty?
 			sub_pos.each do |p|
 				# Reference base is in the MD:Z tag (p[1] here), for the actual base need to go to the read
@@ -129,10 +130,14 @@ Bio::DB::Alignment.class_eval do
         substart = @pos + offset - translation_start - 1
         case p[0]
           when "s"
+						if p[2] = previous_sub_position + 1
+
             mut = Bio::Mutation.new
             mut.type = :substitution
             mut.position = substart+p[2] + 1
             mut.reference = p[1].upcase
+						puts p.inspect
+						puts seq
             mut.mutant = seq[read_position,p[1].length].upcase
 						mut.seqname = @rname.to_s
             mutations << mut

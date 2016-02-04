@@ -54,6 +54,7 @@ if opts[:report]
         next if sam.query_unmapped
         next if config_hash[:length] > Bio::Alignment::CIGAR.new(sam.cigar).reference_length - config_hash[:offset]
         key = "w.t."
+        puts input
         muts = MutationsCLI.call_mutations_given_product sam, config_hash
         if muts
           key = muts.to_hgvs

@@ -3,7 +3,7 @@ class Bio::DB::Tag::MD
 	attr_accessor :tag, :pairs, :cumulative
 	@@regexp = /MD:Z:([\w^]+)/
 	@@format = /[\w^]+/
-	@@splitter = /(?<match>\d+)|(?<substitution>[GATC]+)|\^(?<deletion>[GATC]+)/
+	@@splitter = /(?<match>\d+)|(?<substitution>[GATCN]+)|\^(?<deletion>[GATCN]+)/
 	# Operations that consume reference seqeunce:
 	@@reference = /[msd]/
 	def initialize(data)
@@ -107,7 +107,7 @@ class Bio::DB::Tag::MD
 		else
 			temp_tag = @tag.dup
 			temp_tag.gsub!(/\^/,"")  # Deletions need to be counted - sub the caret character out and count the remaining base characters
-			movements = temp_tag.split(/[GATC]+/).map(&:to_i).reduce(:+) # Sum numbers
+			movements = temp_tag.split(/[GATCN]+/).map(&:to_i).reduce(:+) # Sum numbers
 			deletions = temp_tag.split(/\d+/).map(&:length).reduce(:+) # Sum number of base chars
 			movements + deletions
 		end
