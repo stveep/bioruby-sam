@@ -130,8 +130,6 @@ Bio::DB::Alignment.class_eval do
         substart = @pos + offset - translation_start - 1
         case p[0]
           when "s"
-						if p[2] = previous_sub_position + 1
-
             mut = Bio::Mutation.new
             mut.type = :substitution
             mut.position = substart+p[2] + 1
