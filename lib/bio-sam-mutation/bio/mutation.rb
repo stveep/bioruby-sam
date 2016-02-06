@@ -1,44 +1,7 @@
-# TODO: remove to separate file
-module VepHgvs
-  require 'bio-ensembl-rest'
-  def vep(species="human",reference_type=nil)
-    if reference_type.nil?
-      reference_type = first.seqname.match(/^ENS/) ? "c" : "g"
-    end
-    EnsemblRest.connect_db
-    JSON.parse(EnsemblRest::Variation.vep_hgvs(species,self.to_hgvs(reference_type)))
-  end
-
-  def self.consequences_for_transcript (json_object,tscript)
-    if json_object.length > 0
-      if json_object.first["transcript_consequences"]
-        consequences = json_object.first["transcript_consequences"]
-        cons_of_interest = consequences.keep_if{|a| a["transcript_id"] == tscript}
-        cons_of_interest.map!{|a| { "CDS position" => a["cds_start"], "Protein start" => a["protein_start"], "Mutation" => a["amino_acids"], "Consequence" => a["consequence_terms"]}}
-      end
-    end
-  end
-end
-
-class Bio::MutationArray < Array
-  include VepHgvs
-  def to_hgvs(reference_type=nil)
-    if length > 0 && reference_type.nil?
-      reference_type = first.seqname.match(/^ENS/) ? "c" : "g"
-    end
-    if length == 1
-      first.to_hgvs(reference_type)
-    elsif length > 1
-      [first.seqname,":",reference_type,".["].join + map(&:to_hgvs).join(";") + "]"
-    elsif length == 0
-      nil
-    end
-  end
-end
-
 class Bio::Mutation
+  include VepHgvs
   attr_accessor :position, :type, :reference, :mutant, :seqname
-  def initialize params={position: 1,type: :uninitialized, reference: nil, mutant: nil, seqname:nil}
+  def initialize params={position: 1,type: :uninitialized, reference: nil, mutant: nil, seqname: nil}
     @position = params[:position]
     @type = params[:type]
     @reference = params[:reference]
@@ -88,16 +51,6 @@ class Bio::Mutation
         hgvs_arr.join
         # TODO - distinguish duplications from insertions? Needs further input from ref.
     end
-  end
-
-  # TODO Require reference type - fails without. Assume g, unless matches ENS*T = c?
-  # Can remove and include vephgvs instead
-  def vep(species="human",reference_type=nil)
-    if reference_type.nil?
-      reference_type = @seqname.match(/^ENS/) ? "c" : "g"
-    end
-    EnsemblRest.connect_db
-    JSON.parse(EnsemblRest::Variation.vep_hgvs(species,self.to_hgvs(reference_type)))
   end
 
   def to_json

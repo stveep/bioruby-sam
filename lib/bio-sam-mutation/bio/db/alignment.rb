@@ -108,7 +108,8 @@ Bio::DB::Alignment.class_eval do
 					mut.type = :insertion
 					mut.reference = nil
 					mut.position = reference_pos + offset - translation_start
-					mut.mutant = (insertions.length == 0) ? "N" : insertions.shift.upcase
+					bases = insertions.shift
+					mut.mutant = bases ? bases.upcase : "N"
 					mut.seqname = @rname.to_s
           mutations << mut
 			end
@@ -134,8 +135,6 @@ Bio::DB::Alignment.class_eval do
             mut.type = :substitution
             mut.position = substart+p[2] + 1
             mut.reference = p[1].upcase
-						puts p.inspect
-						puts seq
             mut.mutant = seq[read_position,p[1].length].upcase
 						mut.seqname = @rname.to_s
             mutations << mut

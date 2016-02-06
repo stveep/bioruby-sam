@@ -54,7 +54,6 @@ if opts[:report]
         next if sam.query_unmapped
         next if config_hash[:length] > Bio::Alignment::CIGAR.new(sam.cigar).reference_length - config_hash[:offset]
         key = "w.t."
-        puts input
         muts = MutationsCLI.call_mutations_given_product sam, config_hash
         if muts
           key = muts.to_hgvs
@@ -66,7 +65,7 @@ if opts[:report]
       end
       total_reads = calls.map{|k,v| v.count}.reduce(:+)
       out.puts file
-      out.puts "Total reads: total_reads"
+      out.puts "Total reads: #{total_reads}"
       threshold = total_reads ? opts[:mincov] * total_reads : 0
       calls.keep_if{|k, v| v.count > threshold}
       mutants << file unless calls.keys.include? "w.t." || total_reads < opts[:flag]
@@ -77,10 +76,18 @@ if opts[:report]
         if allele.mutations
           hgvs = allele.mutations.to_hgvs
           if allele.mutations.size == 1 # VEP lookup doesn't work for compound mutations
-            vep = allele.lookup
-            result = lookups[hgvs] ? lookups[hgvs] : VepHgvs.consequences_for_transcript(vep,config_hash[:transcript]).first
-            if result
-              formatted = [result["CDS position"].to_s+" "+result["Allele"],result["Protein start"].to_s+" "+result["Mutation"],result["Consequence"]].join("\t")
+            begin
+              vep = allele.lookup
+            rescue RuntimeError
+              result = nil
+            end
+            # TODO: sort out the cacheing - does it actually work?
+            if vep
+              result = lookups[hgvs] ? lookups[hgvs] : VepHgvs.consequences_for_transcript(vep,config_hash[:transcript]).first
+              if result
+                result.each
+                formatted = [[result["CDS position"].to_s,result["Allele"]].join(" "),[result["Protein start"].to_s,result["Mutation"]].join(" "),result["Consequence"]].join("\t")
+              end
             else
               formatted = "No VEP result"
             end

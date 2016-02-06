@@ -1,3 +1,4 @@
+# Used for tracking mutations appearing more than once and cacheing VEP lookups
 class MutantAllele
   attr_accessor :mutations, :count, :example, :seq
   class << self
