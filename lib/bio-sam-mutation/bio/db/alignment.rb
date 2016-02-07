@@ -31,28 +31,31 @@ Bio::DB::Alignment.class_eval do
 		insertions = 0
 		if mutations
 			mutations.each do |mut|
+				puts "start: #{pointer}"
+				puts mut.inspect
 				case mut.type
 					when :deletion
 						# position for deletion is the first deleted base
-						fillin = mut.position-1-reference_pos-1
+						fillin = mut.position-1-reference_pos-1-deletions+insertions
 				    output << @seq[pointer..fillin] if fillin > pointer
 						mut.reference.length.times{ output << "-" }
 						pointer += fillin - pointer + 1
 						deletions += mut.reference.length
 					when :insertion
 						# position for insertion is the base we want
-						fillin = mut.position-reference_pos-1
+						fillin = mut.position-reference_pos-1-deletions+insertions
 						output << @seq[pointer..fillin] if fillin > pointer
 						output << ins_chr + mut.mutant.downcase + ins_chr
 						pointer += fillin - pointer + 1 + mut.mutant.length
 						insertions += mut.mutant.length
 					when :substitution
 						# position for substitution is the first subbed base
-						fillin = mut.position-1-reference_pos-1
+						fillin = mut.position-1-reference_pos-1-deletions+insertions
 				    output << @seq[pointer..fillin] if fillin > pointer
 						output << mut.mutant.downcase
 						pointer += fillin - pointer + 1 + mut.mutant.length
 				end
+				puts "end: #{pointer}"
 			end
 		end
 		# Remaining sequence
