@@ -25,30 +25,34 @@ Bio::DB::Alignment.class_eval do
 	# Output a representation of the query sequence
 	def query offset=1, length=@seq.length, reference_pos=@pos-1, ins_chr="_"
 	  mutations = self.mutations(offset,length)
-		pointer = offset-1
+		cigar = Bio::Alignment::CIGAR.new(@cigar,seq,source="sam")
+		preceding = cigar.subalignment(0,offset-1)
+		preceding_diff = preceding.query_length-(offset-1)
+		pointer = preceding.query_length
 		output = []
 		deletions = 0
 		insertions = 0
 		if mutations
 			mutations.each do |mut|
+				mut.position = mut.position + insertions - deletions + preceding_diff
 				case mut.type
 					when :deletion
 						# position for deletion is the first deleted base
-						fillin = mut.position-1-reference_pos-1-deletions+insertions
+						fillin = mut.position-1-reference_pos-1
 				    output << @seq[pointer..fillin] if fillin > pointer
 						mut.reference.length.times{ output << "-" }
 						pointer += fillin - pointer + 1
 						deletions += mut.reference.length
 					when :insertion
 						# position for insertion is the base we want
-						fillin = mut.position-reference_pos-1-deletions+insertions
+						fillin = mut.position-reference_pos-1
 						output << @seq[pointer..fillin] if fillin > pointer
 						output << ins_chr + mut.mutant.downcase + ins_chr
 						pointer += fillin - pointer + 1 + mut.mutant.length
 						insertions += mut.mutant.length
 					when :substitution
 						# position for substitution is the first subbed base
-						fillin = mut.position-1-reference_pos-1-deletions+insertions
+						fillin = mut.position-1-reference_pos-1
 				    output << @seq[pointer..fillin] if fillin > pointer
 						output << mut.mutant.downcase
 						pointer += fillin - pointer + 1 + mut.mutant.length
@@ -57,7 +61,7 @@ Bio::DB::Alignment.class_eval do
 		end
 		# Remaining sequence
 		if offset + length > pointer
-      output << @seq[pointer..offset-1+length-1-deletions+insertions]
+      output << @seq[pointer..offset-1+length-1-deletions+insertions+preceding_diff]
 		end
 		output.join
 	end
