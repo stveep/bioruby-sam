@@ -31,8 +31,6 @@ Bio::DB::Alignment.class_eval do
 		insertions = 0
 		if mutations
 			mutations.each do |mut|
-				puts "start: #{pointer}"
-				puts mut.inspect
 				case mut.type
 					when :deletion
 						# position for deletion is the first deleted base
@@ -55,7 +53,6 @@ Bio::DB::Alignment.class_eval do
 						output << mut.mutant.downcase
 						pointer += fillin - pointer + 1 + mut.mutant.length
 				end
-				puts "end: #{pointer}"
 			end
 		end
 		# Remaining sequence
