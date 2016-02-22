@@ -1,8 +1,10 @@
 module MutationsCLI
   @default_species = "human"
   @tag_to_add = "YH:m"
+  @comment_char = "#"
+  @barcode_regexp = /IonXpress_(\w+)\.R/
   class << self
-    attr_accessor :default_species, :tag_to_add
+    attr_accessor :default_species, :tag_to_add, :comment_char, :barcode_regexp
   end
 
   def self.tag (sam, config, species=MutationsCLI.default_species)

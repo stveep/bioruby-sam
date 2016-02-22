@@ -12,6 +12,7 @@ opts = Trollop::options do
   opt :report, "Produce a report by amplicon for each file given, including read counts and annotation for each allele. (does not work on a stream)"
   opt :mincov, "Minimum fraction of reads to report a mutant allele.", default: 0.01
   opt :flag, "Minimum reads to flag a potential mutant (= no wild type).", default: 20
+  opt :direct, "Comment other output lines in report to allow direct reading as a tsv text file."
 end
 
 raise "Cannot use report and tag simultaneously." if opts[:report] && opts[:tag]
@@ -36,13 +37,24 @@ end
 end
 
 if opts[:report]
+  comment = ""
+  if opts[:direct]
+    comment = MutationsCLI.comment_char
+  end
   config[:products].each do |product_name, config_hash|
     config_hash = MutationsCLI.set_defaults(config_hash)
     lookups = {}
     out = File.open(product_name+"-report.txt",'w')
+    headers = ["File","Sequence","Reads","Allele","Deletions","Insertions","cDNA","Protein","Annotation"]
+    out.puts headers.join("\t") if opts[:direct]
     mutants = []
     ARGV.each do |file|
       calls = Hash.new{|h,k| h[k] = MutantAllele.new}
+      if file.match MutationsCLI.barcode_regexp
+        shortname = $~[1]
+      else
+        shortname = File.basename(file,".*")
+      end
       File.open(file).readlines.each do |input|
         next if input.match /^@/ # skip sam headers
         sam = Bio::DB::Alignment.new(input)
@@ -52,6 +64,8 @@ if opts[:report]
         end
         # Must be have sufficient mapped length to call mutations in the given interval:
         next if sam.query_unmapped
+        #next if sam.cigar.match /^\d+S/ #Workaround to skip reads with soft clipping at start - doesn't seem to work currently.
+
         next if config_hash[:length] > Bio::Alignment::CIGAR.new(sam.cigar).reference_length - config_hash[:offset]
         key = "w.t."
         muts = MutationsCLI.call_mutations_given_product sam, config_hash
@@ -64,8 +78,9 @@ if opts[:report]
         calls[key].count += 1
       end
       total_reads = calls.map{|k,v| v.count}.reduce(:+)
-      out.puts file
-      out.puts "Total reads: #{total_reads}"
+      out.puts comment + file
+      out.puts "#{comment}Total reads: #{total_reads}"
+      out.puts headers.join("\t") unless opts[:direct]
       threshold = total_reads ? opts[:mincov] * total_reads : 0
       calls.keep_if{|k, v| v.count > threshold}
       mutants << file unless calls.keys.include? "w.t." || total_reads < opts[:flag]
@@ -97,12 +112,13 @@ if opts[:report]
           end
         end
         formatted ||= "No mutation"
-        out.puts ([allele.seq, allele.count, key, formatted]).join("\t")
+        stats = [ allele.example.cigar_obj.subalignment(config_hash[:offset],config_hash[:length]).deleted_length, allele.example.cigar_obj.subalignment(config_hash[:offset],config_hash[:length]).inserted_length ]
+        out.puts ([shortname, allele.seq, allele.count, key] + stats + [formatted]).join("\t")
       end
-      out.puts "\n===================================="
+      out.puts "\n#{comment}===================================="
     end
-    out.puts "Files with wild type below threshold:"
-    out.puts mutants.join("\n")
+    out.puts "#{comment}Files with wild type below threshold:"
+    out.puts comment + mutants.join("\n#{comment}")
   end
 
 end
