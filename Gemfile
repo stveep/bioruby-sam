@@ -2,7 +2,7 @@ source "http://rubygems.org"
 
   gem "bio", ">= 1.4.2"
   # Using edge version due to a problem with ruby >2.1 in biogems version at time of writing
-  gem "bio-samtools", "~>2.3.4", git: "https://github.com/helios/bioruby-samtools.git", ref: "2e77274"
+  gem "bio-samtools", "~>2.3.4", git: "https://github.com/helios/bioruby-samtools.gi://github.com/stveep/bioruby-samtools.git", ref: "05bd360"
   # JSON serialisation:
   gem "oj", "~>2.14"
   # At the time of writing, the released version 0.2.0 does not include the variation#vep_hgvs method
