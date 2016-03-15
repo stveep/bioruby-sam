@@ -15,6 +15,27 @@ opts = Trollop::options do
   opt :direct, "Comment other output lines in report to allow direct reading as a tsv text file."
 end
 
+if opts[:example_config]
+  print 'Example YAML config file. Colons and indentation are important!
+
+:species: "human"
+:products:
+  pool1:
+    :start: "GGG"
+    :offset: 25
+    :length: 140
+    :transcript: "ENST00000366794"
+    :translation_start: 145
+  pool2:
+    :start: "AGT"
+    :offset: 10
+    :length: 320
+    :transcript: "ENST00000366794"
+    :translation_start: 145
+'
+  exit
+end
+
 raise "Cannot use report and tag simultaneously." if opts[:report] && opts[:tag]
 
 # Trollop removes and parses the options, leaving either input files or the incoming stream:
