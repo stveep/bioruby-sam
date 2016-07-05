@@ -65,4 +65,5 @@ module Bio::Alignment::IteratePairs
 		end
 		new_array
 	end
+
 end

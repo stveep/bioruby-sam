@@ -123,11 +123,11 @@ class Bio::Alignment::CIGAR
 		sequence = []
 		total = 0
 		@pairs.each do |pair|
-			if pair[0].match("M")
+			if pair[0] == "M"
 				sequence << @reference[total..total+pair[1]-1].upcase
 				total += pair[1]
 			end
-			if pair[0].match("I")
+			if pair[0] == "I"
 				if (insertions)
 					insertion = insertions.shift.to_s
 				else
@@ -135,7 +135,7 @@ class Bio::Alignment::CIGAR
 				end
 				sequence << insertion
 			end
-			if pair[0].match("D")
+			if pair[0] == "D"
 				pair[1].times{ sequence << "-" }
 				total += pair[1]
 			end

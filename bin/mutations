@@ -48,7 +48,7 @@ if config.keys.include? :products
   config = MutationsCLI.construct_products(config)
 else
   config[:single_product] = true
-  config[:output] ||= opt[:output]
+  config[:output] ||= opts[:output]
   config[:outfile] = File.open(config[:output],'w')
 end
 
