@@ -47,13 +47,11 @@ module MutationsCLI
   end
 
   def self.call_mutations_given_product sam, config
-    # Stop if a search file is specified, and this isn't it.
-    return if MutationsCLI.not_included_file?(config, ARGF)
     sam.mutations(config[:offset],config[:length],config[:translation_start])
   end
 
   def self.not_included_file? config, input
-    config[:file] && input.filename !~ config[:file]
+    config[:file] && (input.filename !~ config[:file])
   end
 
   def self.set_defaults config_hash

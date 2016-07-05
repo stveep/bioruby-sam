@@ -70,16 +70,21 @@ if opts[:report]
     out.puts headers.join("\t") if opts[:direct]
     mutants = []
     ARGV.each do |file|
+      # Skip file if a specific file is specified and this isn't it
+      if config_hash[:file]
+        next unless config_hash[:file].match file
+      end
       calls = Hash.new{|h,k| h[k] = MutantAllele.new}
       if file.match MutationsCLI.barcode_regexp
         shortname = $~[1]
       else
         shortname = File.basename(file,".*")
       end
-      File.open(file).readlines.each do |input|
+      File.foreach(file) do |input|
         next if input.match /^@/ # skip sam headers
         sam = Bio::DB::Alignment.new(input)
         # Check correct start in case of file with mixed amplicons
+        next unless sam.seq
         if config_hash[:start]
           next unless sam.seq.match Regexp.new("^"+config_hash[:start])
         end
@@ -106,6 +111,7 @@ if opts[:report]
       calls.keep_if{|k, v| v.count > threshold}
       mutants << file unless calls.keys.include? "w.t." || total_reads < opts[:flag]
       calls = calls.sort_by{|k,v| v.count}.reverse.to_h
+      calls.inspect
       calls.each do |key, allele|
         hgvs, vep = ""
         formatted = nil
