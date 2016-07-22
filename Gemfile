@@ -1,7 +1,7 @@
 source "http://rubygems.org"
 
   gem "bio", ">= 1.4.2"
-  gem "bio-samtools", "~>2.4.0" 
+  gem "bio-samtools", "~> 2.4" 
   # JSON serialisation:
   gem "oj", "~>2.14"
   # At the time of writing, the released version 0.2.0 does not include the variation#vep_hgvs method

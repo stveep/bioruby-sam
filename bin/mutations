@@ -128,7 +128,7 @@ if opts[:report]
               result = lookups[hgvs] ? lookups[hgvs] : VepHgvs.consequences_for_transcript(vep,config_hash[:transcript]).first
               if result
                 result.each
-                formatted = [[result["CDS position"].to_s,result["Allele"]].join(" "),[result["Protein start"].to_s,result["Mutation"]].join(" "),result["Consequence"]].join("\t")
+                formatted = [[result["CDS position"].to_s,result["Allele"]].join(" "),[result["Protein start"].to_s,result["Mutation"]].join(" "),result["Consequence"]].join(",")
               end
             else
               formatted = "No VEP result"
