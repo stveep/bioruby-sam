@@ -1,4 +1,5 @@
 require 'helper'
+require 'net/ping'
 class MutationTest < Test::Unit::TestCase
   def test_mutation_initialisation
     params = {position: 1234,
@@ -69,16 +70,18 @@ class MutationTest < Test::Unit::TestCase
     assert_equal "5:g.1234_1235insT", mut.to_hgvs("g")
   end
 
-  # def test_vep
-  #   params = {position: 112839914,
-  #             type: :deletion,
-  #             reference: "ACCACC",
-  #             mutant: nil,
-  #             seqname: 5}
-  #   mut = Bio::Mutation.new(params)
-  #   result = mut.vep("human","g")
-  #   assert_equal "inframe_deletion", result.first["most_severe_consequence"], "NB: Test written for GRCh38"
-  #   assert_equal "ACCACC/-", result.first["allele_string"], "NB: Test written for GRCh38"
-  #   # TODO Continue...
-  # end
+  def test_vep
+    skip_unless_ensembl_available do
+      params = {position: 112839914,
+                type: :deletion,
+                reference: "ACCACC",
+                mutant: nil,
+                seqname: 5}
+      mut = Bio::Mutation.new(params)
+      mut_array = Bio::MutationArray.new([mut])
+      result = mut_array.vep("human","g")
+      assert_equal "inframe_deletion", result.first["most_severe_consequence"], "NB: Test written for GRCh38"
+      assert_equal "ACCACC/-", result.first["allele_string"], "NB: Test written for GRCh38"
+    end
+  end
 end

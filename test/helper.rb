@@ -32,3 +32,9 @@ require 'bio-sam-mutation'
 
 class Test::Unit::TestCase
 end
+
+def skip_unless_ensembl_available
+    omit_unless(Net::Ping::External.new("www.ensembl.org").ping?, "Skipping test, Ensembl not reachable") do
+      yield
+    end
+end
