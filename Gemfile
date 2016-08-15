@@ -9,6 +9,7 @@ source "http://rubygems.org"
   gem "bio-ensembl-rest", "0.2.0", git: "https://github.com/ALTree/bio-ensembl-rest.git", ref: "c934fa0"
   gem "trollop"
   gem "rake", "~>0.9"
+  gem "net-ping"
 
 group :development do
   gem "shoulda", ">= 0"
@@ -17,4 +18,5 @@ group :development do
   gem "jeweler", "~> 2.0"
   gem "bundler"
   gem "test-unit", "~> 3.0"
+  gem "rspec"
 end
