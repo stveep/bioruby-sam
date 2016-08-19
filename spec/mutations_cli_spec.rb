@@ -1,4 +1,3 @@
-require '../lib/bio-sam-mutation.rb'
 describe MutationsCLI do
   describe "setting configuration" do
     it "sets up defaults for missing values in the config" do
