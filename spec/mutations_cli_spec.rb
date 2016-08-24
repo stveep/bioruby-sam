@@ -1,5 +1,32 @@
 describe MutationsCLI do
   describe "setting configuration" do
+    it "Reads excel config" do
+      expect(MutationsCLI.read_config("spec/fixtures/config.xlsx"))
+        .to eq({"product" => {start: "TAG", 
+               offset: 1, 
+               length: 400, 
+               translation_start: 1
+               }})
+    end
+
+    it "Reads yaml config" do
+      expect(MutationsCLI.read_config("spec/fixtures/config.yml"))
+        .to eq({"product" => {start: "TAG", 
+               offset: 1, 
+               length: 400, 
+               translation_start: 1
+               }})
+    end
+
+    it "Reads text config" do
+      expect(MutationsCLI.read_config("spec/fixtures/config.txt"))
+        .to eq({"product" => {start: "TAG", 
+               offset: 1, 
+               length: 400, 
+               translation_start: 1
+               }})
+    end
+
     it "sets up defaults for missing values in the config" do
       expect(MutationsCLI.set_defaults({file: "filename"}))
         .to eq({start: ".", 

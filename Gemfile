@@ -10,6 +10,7 @@ source "http://rubygems.org"
   gem "trollop"
   gem "rake", "~>0.9"
   gem "net-ping"
+  gem "roo", "~>2.5.0"
 
 group :development do
   gem "shoulda", ">= 0"

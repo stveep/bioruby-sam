@@ -1,4 +1,6 @@
 module MutationsCLI
+  require 'csv'
+  require 'roo'
   @default_species = "human"
   @tag_to_add = "YH:m"
   @comment_char = "#"
@@ -52,6 +54,44 @@ module MutationsCLI
 
   def self.not_included_file? config, input
     config[:file] && (input.filename !~ config[:file])
+  end
+
+  def self.read_config file
+    extension = File.extname(file)
+    case extension
+    when ".yml", ".yaml"
+      YAML.load_file(file)
+    when ".txt", ".csv", ".tsv"
+      sep = (extension == ".csv") ? "," : "\t"
+      hash = {}
+      CSV.foreach(file, col_sep:"\t", header_converters: :symbol, headers: true, converters: :integer) do |line|
+        hash = hash.merge MutationsCLI.hashify_config(line)
+      end
+      hash
+    when ".xls", ".xlsx"
+      hash = {}
+      header = true
+      ss = Roo::Excelx.new(file)
+             .parse(clean: true, header_search: ["Name", "Start", "Offset", "Length", "Translation Start"])
+             .each do |line|
+               if header
+                 header = false
+                 next
+               end
+               new_line = {}
+               line.each{|k,v| new_line[k.downcase.sub(/\s/,"_").to_sym] = v}
+               hash = hash.merge MutationsCLI.hashify_config(new_line)
+             end
+      hash
+    else
+      raise "Config format not recognised: Accept .yml, .yaml, .txt, .csv, .txt, .xls, .xlsx"
+    end
+  end
+
+  def self.hashify_config line
+    line = line.to_h
+    name = line.delete(:name)
+    {name => line}
   end
 
   def self.set_defaults config_hash
