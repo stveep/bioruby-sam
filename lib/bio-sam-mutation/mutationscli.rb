@@ -67,12 +67,12 @@ module MutationsCLI
       CSV.foreach(file, col_sep:"\t", header_converters: :symbol, headers: true, converters: :integer) do |line|
         hash = hash.merge MutationsCLI.hashify_config(line)
       end
-      hash
+      {products: hash}
     when ".xls", ".xlsx"
       hash = {}
       header = true
       ss = Roo::Excelx.new(file)
-             .parse(clean: true, header_search: ["Name", "Start", "Offset", "Length", "Translation Start"])
+             .parse(clean: true, header_search: ["Name"])
              .each do |line|
                if header
                  header = false
@@ -82,7 +82,7 @@ module MutationsCLI
                line.each{|k,v| new_line[k.downcase.sub(/\s/,"_").to_sym] = v}
                hash = hash.merge MutationsCLI.hashify_config(new_line)
              end
-      hash
+      {products: hash}
     else
       raise "Config format not recognised: Accept .yml, .yaml, .txt, .csv, .txt, .xls, .xlsx"
     end

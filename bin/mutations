@@ -39,18 +39,18 @@ end
 raise "Cannot use report and tag simultaneously." if opts[:report] && opts[:tag]
 
 # Trollop removes and parses the options, leaving either input files or the incoming stream:
-config = opts[:config]? YAML.load_file(opts[:config]) : {}
+config = opts[:config]? MutationsCLI.read_config(opts[:config]) : {}
 if opts[:tag]
-if config.keys.include? :products
-  config[:products].each do |product_name, config_hash|
-    config[product_name] = MutationsCLI.set_defaults(config_hash)
+  if config.keys.include? :products
+    config[:products].each do |product_name, config_hash|
+      config[product_name] = MutationsCLI.set_defaults(config_hash)
+    end
+    config = MutationsCLI.construct_products(config)
+  else
+    config[:single_product] = true
+    config[:output] ||= opts[:output]
+    config[:outfile] = File.open(config[:output],'w')
   end
-  config = MutationsCLI.construct_products(config)
-else
-  config[:single_product] = true
-  config[:output] ||= opts[:output]
-  config[:outfile] = File.open(config[:output],'w')
-end
 
   ARGF.each do |input|
     MutationsCLI.tag input, config
