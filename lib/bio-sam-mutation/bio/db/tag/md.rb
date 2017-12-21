@@ -55,6 +55,7 @@ class Bio::DB::Tag::MD
 			end
 			# third element in each array will be the total preceding length on the reference, i.e. the position of the operation.
 			# fourth element is similar for the read.
+			# TODO: take insertions into account - but needs the CIGAR string so need to do in the SAM object.
 			@cumulative << p.dup.push(cumulative_length).push(read_length)
 			cumulative_length += len
 			read_length += rlen

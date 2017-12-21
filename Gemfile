@@ -8,7 +8,7 @@ source "http://rubygems.org"
   # so use this specific commit:
   gem "bio-ensembl-rest", "0.2.0", git: "https://github.com/ALTree/bio-ensembl-rest.git", ref: "c934fa0"
   gem "trollop"
-  gem "rake", "~>0.9"
+  gem "rake"
   gem "net-ping"
   gem "roo", "~>2.5.0"
 

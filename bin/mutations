@@ -2,7 +2,6 @@
 $LOAD_PATH.unshift File.join(__dir__, '..', 'lib')
 require 'trollop'
 require 'bio-sam-mutation'
-require 'pry'
 
 opts = Trollop::options do
   opt :config, "Configuration file in YAML format. Defaults to ./config.yml. Run with --example-config for example.", type: :string, default: "config.yml"
@@ -124,8 +123,8 @@ if opts[:report]
               result = nil
             end
             # TODO: sort out the cacheing - does it actually work?
-            if vep
-              result = lookups[hgvs] ? lookups[hgvs] : VepHgvs.consequences_for_transcript(vep,config_hash[:transcript]).first
+            if vep && v = VepHgvs.consequences_for_transcript(vep,config_hash[:transcript]).first
+              result = lookups[hgvs] ? lookups[hgvs] : v
               if result
                 result.each
                 formatted = [[result["CDS position"].to_s,result["Allele"]].join(" "),[result["Protein start"].to_s,result["Mutation"]].join(" "),result["Consequence"]].join(",")

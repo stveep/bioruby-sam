@@ -80,17 +80,7 @@ Bio::DB::Alignment.class_eval do
     mdz = Bio::DB::Tag::MD.new(@tags["MD"].value)
 		mdz = mdz.slice(offset,length)
     # Get inserted bases from the read sequence, only within the region of interest
-    insertions = []
-    insertion_positions = subcigar.positions(/I/)
-    unless insertion_positions.empty?
-      insertion_positions["I"].each do |ins|
-        # Sam.seq returns a Sequence::NA object
-        # Need a -1 as ruby counts characters
-        # Use ins[2] to retrieve the base as this is the position on query. ins[1] is position on reference, used to annotate position.
-        i = seq.seq[(offset+ins[2]-1),ins[1]]
-        insertions << i
-      end
-    end
+		insertions = inserted_bases(subcigar,seq.seq,offset)
 
     first_match = true
 		total = 0
@@ -128,9 +118,22 @@ Bio::DB::Alignment.class_eval do
 				# p[3] is the length of operations preceding the substitution on the read, p[2] on the reference.
 				# p[2] and p[3] are defined on the subalignment, so should add them onto the preceding.
 				# Need to add in any inserted bases from the CIGAR string using query_length
+				# TODO: also add inserted bases from the rest of the read (between offset and p[3]) as these are
+				# not taken into account from the mdz#report method above
 				preceding = cigar.subalignment(0,offset-1)
+
+				cigar_offset_to_position = cigar.subalignment(offset,p[3])
+				# seq_to_position = seq.seq[offsetVVV,p[3]]
+				# insertion_array = inserted_bases(cigar_offset_to_position,seq_to_position,offset)
+				# insertion_length = 0
+				# puts insertion_array.inspect
+				# unless insertion_array.empty?
+				# 	insertion_length = insertion_array.map(&:length).reduce(&:+)
+				# end
+				# puts insertion_length
+				insertion_length = cigar_offset_to_position.inserted_length
 				# Masked length is not included in the MD:Z string so need to add it
-				read_position = preceding.query_length+preceding.masked_length+p[3]
+				read_position = preceding.query_length + preceding.masked_length + insertion_length + p[3]
         # This is the adjustment needed to get the correct annotation:
         substart = @pos + offset - translation_start - 1
         case p[0]
@@ -155,8 +158,23 @@ Bio::DB::Alignment.class_eval do
     end
     # mutations.length > 0 ? mutations.sort{|x,y| x.position.to_i <=> y.position.to_i} : nil
     mutations.length > 0 ? Bio::MutationArray.new(mutations.sort) : nil
-
   end
+
+	def inserted_bases(subcigar,seq,offset)
+		insertions = []
+    insertion_positions = subcigar.positions(/I/)
+
+    unless insertion_positions.empty?
+      insertion_positions["I"].each do |ins|
+        # Sam.seq returns a Sequence::NA object
+        # Need a -1 as ruby counts characters
+        # Use ins[2] to retrieve the base as this is the position on query. ins[1] is position on reference, used to annotate position.
+        i = seq[(offset+ins[2]-1),ins[1]]
+        insertions << i
+      end
+    end
+		insertions
+	end
 
 	def regenerate_string
 		tags_string = @tags.map{|k,v| [v.tag, v.type, v.value].join(":") }
