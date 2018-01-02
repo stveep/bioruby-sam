@@ -22,5 +22,6 @@ require 'bio-sam-mutation/bio/vephgvs'
 require 'bio-sam-mutation/bio/mutation'
 require 'bio-sam-mutation/bio/mutation_array'
 require 'bio-sam-mutation/bio/mutantallele'
+require 'pry'
 
 require 'bio-sam-mutation/mutationscli'

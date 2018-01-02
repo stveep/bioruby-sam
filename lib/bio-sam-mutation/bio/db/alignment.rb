@@ -53,9 +53,9 @@ Bio::DB::Alignment.class_eval do
 					when :substitution
 						# position for substitution is the first subbed base
 						fillin = mut.position-1-reference_pos-1
-				    output << @seq[pointer..fillin] if fillin > pointer
+				    output << @seq[pointer..fillin] if fillin >= pointer
 						output << mut.mutant.downcase
-						pointer += fillin - pointer + 1 + mut.mutant.length
+						pointer += fillin - pointer + mut.mutant.length + 1
 				end
 			end
 		end

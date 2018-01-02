@@ -12,6 +12,7 @@ opts = Trollop::options do
   opt :mincov, "Minimum fraction of reads to report a mutant allele.", default: 0.01
   opt :flag, "Minimum reads to flag a potential mutant (= no wild type).", default: 20
   opt :direct, "Comment other output lines in report to allow direct reading as a tsv text file."
+  opt :example, "Output an example read for each allele (in report)"
 end
 
 if opts[:example_config]
@@ -140,6 +141,7 @@ if opts[:report]
         formatted ||= "No mutation"
         stats = [ allele.example.cigar_obj.subalignment(config_hash[:offset],config_hash[:length]).deleted_length, allele.example.cigar_obj.subalignment(config_hash[:offset],config_hash[:length]).inserted_length ]
         out.puts ([shortname, allele.seq, allele.count, key] + stats + [formatted]).join("\t")
+        out.puts allele.example.sam_string if opts[:example]
       end
       out.puts "\n#{comment}===================================="
     end
