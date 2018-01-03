@@ -1,6 +1,6 @@
-product:
-  :start: "TAG"
-  :offset: 1
-  :length: 400
-  :translation_start: 1
-               
+:products:
+  product:
+    :start: "TAG"
+    :offset: 1
+    :length: 400
+    :translation_start: 1
